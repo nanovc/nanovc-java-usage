@@ -1,0 +1,2 @@
+# DO NOT Commit the java.config file because it usually has sensitive credentials.
+/config/java.config
