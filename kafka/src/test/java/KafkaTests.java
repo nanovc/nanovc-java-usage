@@ -265,10 +265,6 @@ public class KafkaTests
         // Make sure we seek to the beginning of the partitions:
         consumer.seekToBeginning(topicPartitions);
 
-        // Do a dummy position poll to reset the offsets because it is lazy-evaluated:
-//        consumer.position(topicPartitions.get(0), Duration.ofMillis(1000));
-
-
         try
         {
             int emptyCount = 0;
