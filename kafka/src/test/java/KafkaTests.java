@@ -1,6 +1,10 @@
+import io.confluent.kafka.serializers.KafkaJsonDeserializerConfig;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.common.PartitionInfo;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.TopicExistsException;
 import org.junit.jupiter.api.Test;
 
@@ -9,9 +13,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.Properties;
+import java.time.Duration;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 /**
  * Tests Kafka.
@@ -143,4 +148,109 @@ public class KafkaTests
 
     }
 
+    /**
+     * This test shows an example of consumer code in Java.
+     * https://github.com/confluentinc/examples/blob/6.0.1-post/clients/cloud/java/src/main/java/io/confluent/examples/clients/cloud/ConsumerExample.java
+     */
+    @Test
+    public void consumerExample() throws IOException
+    {
+        final String topic = "test1";
+
+        // Define the properties that we need for this test:
+        // NOTE: You can get these properties by going to the "Tools and client config" page of your cluster in confluent cloud.
+        // The instructions from the example web page were:
+        //      Load properties from a local configuration file
+        //      Create the configuration file (e.g. at '$HOME/.confluent/java.config') with configuration parameters
+        //      to connect to your Kafka cluster, which can be on your local host, Confluent Cloud, or any other cluster.
+        //      Follow these instructions to create this file: https://docs.confluent.io/current/tutorials/examples/clients/docs/java.html
+        // To make the unit test stand-alone, we replicate the contents in this test and use environment variables for the sensitive data.
+        // Make sure to set the following environment variables
+        final Properties props = loadConfig(Path.of(".", "config", "java.config"));
+
+        // Add additional properties.
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringDeserializer");
+        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, "io.confluent.kafka.serializers.KafkaJsonDeserializer");
+        props.put(KafkaJsonDeserializerConfig.JSON_VALUE_TYPE, DataRecord.class);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "demo-consumer-1");
+
+        // NOTE: The following doesn't reset the offset each time, only when the server doesn't have the consumers last offset from the previous run:
+        // https://stackoverflow.com/a/65582541/231860
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
+        final Consumer<String, DataRecord> consumer = new KafkaConsumer<String, DataRecord>(props);
+
+        // Subscribe to the topic but wait for partitions to be assigned so that we can reset offsets to the beginning each time.
+        // NOTE: By default, the Kafka server remembers the last offsets of the clients.
+        //       If we don't reset them then the second time you run this test we would not re-run from the beginning.
+        // https://stackoverflow.com/a/54492802/231860
+        consumer.subscribe(Arrays.asList(topic), new ConsumerRebalanceListener()
+        {
+            @Override public void onPartitionsRevoked(Collection<TopicPartition> partitions)
+            {
+                System.out.println("Assigned " + partitions);
+                Map<TopicPartition, OffsetAndMetadata> offsetAndMetadataMap = consumer.committed(Set.copyOf(partitions));
+                for (Map.Entry<TopicPartition, OffsetAndMetadata> entry : offsetAndMetadataMap.entrySet())
+                {
+                    TopicPartition topicPartition = entry.getKey();
+                    OffsetAndMetadata oam = entry.getValue();
+
+                    if (oam != null)
+                    {
+                        System.out.println("Current offset is " + oam.offset());
+                    }
+                    else
+                    {
+                        System.out.println("No committed offsets");
+                    }
+
+                    System.out.println("Seeking to " + 0L);
+                    consumer.seek(topicPartition, 0L);
+                }
+            }
+
+            @Override public void onPartitionsAssigned(Collection<TopicPartition> partitions)
+            {
+
+            }
+        });
+
+        Long total_count = 0L;
+
+        // Get the partitions that exist for this topic:
+        List<PartitionInfo> partitions = consumer.partitionsFor(topic);
+
+        // Get the topic partition info for these partitions:
+        List<TopicPartition> topicPartitions = partitions.stream().map(info -> new TopicPartition(info.topic(), info.partition())).collect(Collectors.toList());
+
+        // Make sure we seek to the beginning of the partitions:
+        consumer.seekToBeginning(topicPartitions);
+
+        // Do a dummy position poll to reset the offsets because it is lazy-evaluated:
+        consumer.position(topicPartitions.get(0), Duration.ofMillis(100));
+
+
+        try
+        {
+            while (true)
+            {
+                ConsumerRecords<String, DataRecord> records = consumer.poll(Duration.ofMillis(100));
+                //if (records.isEmpty()) break;
+                for (ConsumerRecord<String, DataRecord> record : records)
+                {
+                    String key = record.key();
+                    DataRecord value = record.value();
+                    total_count += value.getCount();
+                    if ((total_count % 10_000) == 0)
+                    {
+                        System.out.printf("Consumed record with key %s and value %s, and updated total count to %d%n", key, value, total_count);
+                    }
+                }
+            }
+        }
+        finally
+        {
+            consumer.close();
+        }
+    }
 }
