@@ -1,33 +1,31 @@
 import io.confluent.kafka.serializers.KafkaJsonDeserializer;
 import io.confluent.kafka.serializers.KafkaJsonDeserializerConfig;
 import io.confluent.kafka.serializers.KafkaJsonSerializer;
-import org.apache.kafka.clients.admin.AdminClient;
-import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
-import org.apache.kafka.common.errors.TopicExistsException;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
-import org.apache.kafka.streams.processor.internals.InternalTopologyBuilder;
 import org.junit.jupiter.api.Test;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.ExecutionException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+
+import static io.nanovc.kafka.KafkaHelper.*;
 
 /**
  * Tests Kafka.
@@ -59,10 +57,8 @@ public class KafkaTests
         final String topic = "test1";
         createTopic(topic, 1, 3, props);
 
-        // Add additional properties.
-        props.put(ProducerConfig.ACKS_CONFIG, "all");
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "io.confluent.kafka.serializers.KafkaJsonSerializer");
+        // Add additional properties:
+        ProducerConfigInfo info = prepareConfigForProducers(props, "demo-producer-1", StringSerializer.class, KafkaJsonSerializer.class);
 
         Producer<String, DataRecord> producer = new KafkaProducer<String, DataRecord>(props);
 
@@ -98,62 +94,6 @@ public class KafkaTests
         producer.close();
     }
 
-    /**
-     * Create topic in Confluent Cloud
-     */
-    public static void createTopic(final String topic,
-                                   final int partitions,
-                                   final int replication,
-                                   final Properties cloudConfig)
-    {
-        final NewTopic newTopic = new NewTopic(topic, partitions, (short) replication);
-        try (final AdminClient adminClient = AdminClient.create(cloudConfig))
-        {
-            adminClient.createTopics(Collections.singletonList(newTopic)).all().get();
-        }
-        catch (final InterruptedException | ExecutionException e)
-        {
-            // Ignore if TopicExistsException, which may be valid if topic exists
-            if (!(e.getCause() instanceof TopicExistsException))
-            {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    /**
-     * Deletes a topic from Confluent Cloud
-     */
-    public static void deleteTopic(final String topic,
-                                   final Properties cloudConfig)
-    {
-        try (final AdminClient adminClient = AdminClient.create(cloudConfig))
-        {
-            adminClient.deleteTopics(Collections.singletonList(topic)).all().get();
-        }
-        catch (final InterruptedException | ExecutionException e)
-        {
-            // Ignore if TopicExistsException, which may be valid if topic exists
-            if (!(e.getCause() instanceof TopicExistsException))
-            {
-                throw new RuntimeException(e);
-            }
-        }
-    }
-
-    public static Properties loadConfig(final Path configFile) throws IOException
-    {
-        if (!Files.exists(configFile))
-        {
-            throw new IOException(configFile + " not found.");
-        }
-        final Properties cfg = new Properties();
-        try (InputStream inputStream = new FileInputStream(configFile.toFile()))
-        {
-            cfg.load(inputStream);
-        }
-        return cfg;
-    }
 
     public static class DataRecord
     {
@@ -349,20 +289,12 @@ public class KafkaTests
         // Make sure to set the following environment variables
         final Properties props = loadConfig(Path.of(".", "config", "java.config"));
 
-        // Add additional properties.
-        // Specify default (de)serializers for record keys and for record values.
-        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-
-        // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
-        // against which the application is run.
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "map-function-lambda-example" + System.nanoTime());
-        props.put(StreamsConfig.CLIENT_ID_CONFIG, "map-function-lambda-example-client");
-
-        // NOTE: The following doesn't reset the offset each time, only when the server doesn't have the consumers last offset from the previous run:
-        // https://stackoverflow.com/a/65582541/231860
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-
+        // Add additional properties:
+        StreamConfigInfo info = prepareConfigForStreams(
+            props,
+            "map-function-lambda-example", true,
+            "map-function-lambda-example-client"
+        );
 
         // Make sure that the output topic exists:
         createTopic(outputTopic, 1, 3, props);
@@ -475,32 +407,16 @@ public class KafkaTests
         // Make sure to set the following environment variables
         final Properties props = loadConfig(Path.of(".", "config", "java.config"));
 
-        // Add additional properties.
-        // Specify default (de)serializers for record keys and for record values.
-        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        // Add additional properties:
+        StreamConfigInfo info = prepareConfigForStreams(
+            props,
+            "ktable-function-lambda-example", true,
+            "ktable-function-lambda-example-client"
+        );
 
         // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
         // against which the application is run.
-        final String APPLICATION_ID = "ktable-function-lambda-example" + System.nanoTime();
-        props.put(StreamsConfig.APPLICATION_ID_CONFIG, APPLICATION_ID);
-        props.put(StreamsConfig.CLIENT_ID_CONFIG, "ktable-function-lambda-example-client");
-
-        // NOTE: The following doesn't reset the offset each time, only when the server doesn't have the consumers last offset from the previous run:
-        // https://stackoverflow.com/a/65582541/231860
-        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
-
-
-        // Confluent Cloud doesn't allow auto creation of topics! Bleh!
-        // https://riferrei.com/2020/03/17/why-the-property-auto-create-topics-enable-is-disabled-in-confluent-cloud/
-        // Therefore, we need to create the intermediate topics that we need for the KTables:
-        // String INTERMEDIATE_TOPIC_NAME = APPLICATION_ID + "KSTREAM-AGGREGATE-STATE-STORE-0000000001-changelog";
-       // createTopic(INTERMEDIATE_TOPIC_NAME, 1, 3, props);
-
-        // We also need to set properties to match the created topic settings so we don't get exceptions. Bleh!
-        // https://stackoverflow.com/a/59532310/231860
-        props.put(StreamsConfig.REPLICATION_FACTOR_CONFIG, 3);
-
+        final String APPLICATION_ID = info.applicationID;
 
         // Set up serializers and deserializers, which we will use for overriding the default serdes
         // specified above.
@@ -593,31 +509,6 @@ public class KafkaTests
         TopologyDescription topologyDescription = topology.describe();
 
         // Delete the temporary topic that we created:
-        for (TopologyDescription.Subtopology subtopology : topologyDescription.subtopologies())
-        {
-            for (TopologyDescription.Node node : subtopology.nodes())
-            {
-                if (node instanceof InternalTopologyBuilder.Processor)
-                {
-                    InternalTopologyBuilder.Processor processor = (InternalTopologyBuilder.Processor) node;
-                    for (String storeName : ((InternalTopologyBuilder.Processor) node).stores())
-                    {
-                        // Create the topic name for this store:
-                        // NOTE this comes from the KTable.count() documentation:
-                        // For failure and recovery the store will be backed by an internal changelog topic that will be created in Kafka.
-                        // The changelog topic will be named "${applicationId}-${internalStoreName}-changelog",
-                        // where "applicationId" is user-specified in StreamsConfig via parameter APPLICATION_ID_CONFIG,
-                        // "internalStoreName" is an internal name
-                        // and "-changelog" is a fixed suffix.
-                        // Note that the internal store name may not be queryable through Interactive Queries.
-                        // You can retrieve all generated internal topic names via Topology.describe().
-                        String topicName = APPLICATION_ID + "-" + storeName + "-changelog";
-
-                        // Delete the topic:
-                        deleteTopic(topicName, props);
-                    }
-                }
-            }
-        }
+        deleteIntermediateTopics(topologyDescription, APPLICATION_ID, props);
     }
 }
