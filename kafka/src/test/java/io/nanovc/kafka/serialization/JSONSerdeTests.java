@@ -1,6 +1,5 @@
 package io.nanovc.kafka.serialization;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import io.nanovc.Event;
 import org.junit.jupiter.api.Test;
 
@@ -139,12 +138,6 @@ class JSONSerdeTests
     public static class Record
     {
         public String name;
-    }
-
-    public static class EventMixin extends ObjectMixin
-    {
-        @JsonTypeInfo(use=JsonTypeInfo.Id.CLASS, include= JsonTypeInfo.As.PROPERTY, property="type")
-        public Object record;
     }
 
     public static class RecordMixin extends ObjectMixin
