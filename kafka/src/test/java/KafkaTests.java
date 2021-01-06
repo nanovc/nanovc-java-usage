@@ -413,6 +413,137 @@ public class KafkaTests
             });
 
 
+        // Reset the timer:
+        lastTimestamp.set(System.nanoTime());
+
+        streams.start();
+
+        while (true)
+        {
+            // Wait a bit:
+            Thread.sleep(1_000);
+
+            // Check when the last time was that we got a value:
+            long now = System.nanoTime();
+            long lastModification = lastTimestamp.get();
+            long delta = now - lastModification;
+            if (delta > 10_000_000_000L) break;
+        }
+
+        // Gracefully close Kafka Streams:
+        streams.close();
+    }
+
+    /**
+     * An example of using the streams API.
+     * Inspired by:
+     * https://github.com/confluentinc/kafka-streams-examples/blob/6.0.1-post/src/main/java/io/confluent/examples/streams/SumLambdaExample.java
+     */
+    @Test
+    public void kTableExample() throws IOException, InterruptedException
+    {
+        final String topic = "test1";
+        final String outputTopic = topic + "-modified";
+
+        // Define the properties that we need for this test:
+        // NOTE: You can get these properties by going to the "Tools and client config" page of your cluster in confluent cloud.
+        // The instructions from the example web page were:
+        //      Load properties from a local configuration file
+        //      Create the configuration file (e.g. at '$HOME/.confluent/java.config') with configuration parameters
+        //      to connect to your Kafka cluster, which can be on your local host, Confluent Cloud, or any other cluster.
+        //      Follow these instructions to create this file: https://docs.confluent.io/current/tutorials/examples/clients/docs/java.html
+        // To make the unit test stand-alone, we replicate the contents in this test and use environment variables for the sensitive data.
+        // Make sure to set the following environment variables
+        final Properties props = loadConfig(Path.of(".", "config", "java.config"));
+
+        // Add additional properties.
+        // Specify default (de)serializers for record keys and for record values.
+        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+
+        // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
+        // against which the application is run.
+        final String APPLICATION_ID = "ktable-function-lambda-example" + System.nanoTime();
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, APPLICATION_ID);
+        props.put(StreamsConfig.CLIENT_ID_CONFIG, "ktable-function-lambda-example-client");
+
+        // NOTE: The following doesn't reset the offset each time, only when the server doesn't have the consumers last offset from the previous run:
+        // https://stackoverflow.com/a/65582541/231860
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
+
+        // Make sure that the output topic exists:
+        createTopic(outputTopic, 1, 3, props);
+
+        // Confluent Cloud doesn't allow auto creation of topics! Bleh!
+        // https://riferrei.com/2020/03/17/why-the-property-auto-create-topics-enable-is-disabled-in-confluent-cloud/
+        // Therefore, we need to create the intermediate topics that we need for the KTables:
+        createTopic(APPLICATION_ID + "KSTREAM-AGGREGATE-STATE-STORE-0000000001-changelog", 1, 3, props);
+
+        // We also need to set properties to match the created topic settings so we don't get exceptions. Bleh!
+        // https://stackoverflow.com/a/59532310/231860
+        props.put(StreamsConfig.REPLICATION_FACTOR_CONFIG, 3);
+
+
+        // Set up serializers and deserializers, which we will use for overriding the default serdes
+        // specified above.
+        final Serde<String> stringSerde = Serdes.String();
+        KafkaJsonSerializer<DataRecord> dataRecordSerializer = new KafkaJsonSerializer<>();
+        KafkaJsonDeserializer<DataRecord> dataRecordDeserializer = new KafkaJsonDeserializer<>();
+        Map<String, Object> dataRecordConfigMap = Map.of(KafkaJsonDeserializerConfig.JSON_VALUE_TYPE, DataRecord.class);
+        dataRecordSerializer.configure(dataRecordConfigMap, false);
+        dataRecordDeserializer.configure(dataRecordConfigMap, false);
+        Serde<DataRecord> dataRecordSerde = Serdes.serdeFrom(dataRecordSerializer, dataRecordDeserializer);
+
+        // In the subsequent lines we define the processing topology of the Streams application.
+        final StreamsBuilder builder = new StreamsBuilder();
+
+        // Read the input Kafka topic into a KStream instance.
+        final KStream<String, DataRecord> dataRecordStream = builder.stream(topic, Consumed.with(stringSerde, dataRecordSerde));
+
+        // Keep track of the last time we processed data:
+        AtomicLong lastTimestamp = new AtomicLong(System.nanoTime());
+
+        // Keep track of how many records we have modified:
+        AtomicInteger count = new AtomicInteger();
+
+        // Process the stream using KTables:
+        dataRecordStream
+            .groupByKey()
+            .count()
+            .filter((key, value) -> value > 2)
+            .toStream()
+            .foreach(
+                (key, value) ->
+                {
+                    // Update the timestamp so we can detect when there is no progress:
+                    lastTimestamp.set(System.nanoTime());
+
+                    // Update the count:
+                    count.incrementAndGet();
+
+                    System.out.printf("%s:%,d Data Records%n", key, value);
+                });
+
+        final KafkaStreams streams = new KafkaStreams(builder.build(), props);
+        // Always (and unconditionally) clean local state prior to starting the processing topology.
+        // We opt for this unconditional call here because this will make it easier for you to play around with the example
+        // when resetting the application for doing a re-run (via the Application Reset Tool,
+        // http://docs.confluent.io/current/streams/developer-guide.html#application-reset-tool).
+        //
+        // The drawback of cleaning up local state prior is that your app must rebuilt its local state from scratch, which
+        // will take time and will require reading all the state-relevant data from the Kafka cluster over the network.
+        // Thus in a production scenario you typically do not want to clean up always as we do here but rather only when it
+        // is truly needed, i.e., only under certain conditions (e.g., the presence of a command line flag for your app).
+        // See `ApplicationResetExample.java` for a production-like example.
+        streams.cleanUp();
+
+        streams.setStateListener(
+            (newState, oldState) ->
+            {
+                System.out.printf("%s->%s%n", newState, oldState);
+            });
+
 
         // Reset the timer:
         lastTimestamp.set(System.nanoTime());
