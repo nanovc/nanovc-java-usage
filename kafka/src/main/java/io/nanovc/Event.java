@@ -7,8 +7,4 @@ package io.nanovc;
  */
 public class Event extends EventBase
 {
-    /**
-     * The record for the event.
-     */
-    public Object record;
 }
