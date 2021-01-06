@@ -10,13 +10,11 @@ import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.TopicExistsException;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
-import org.apache.kafka.streams.KafkaStreams;
-import org.apache.kafka.streams.KeyValue;
-import org.apache.kafka.streams.StreamsBuilder;
-import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.*;
 import org.apache.kafka.streams.kstream.Consumed;
 import org.apache.kafka.streams.kstream.KStream;
 import org.apache.kafka.streams.kstream.Produced;
+import org.apache.kafka.streams.processor.internals.InternalTopologyBuilder;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileInputStream;
@@ -100,7 +98,9 @@ public class KafkaTests
         producer.close();
     }
 
-    // Create topic in Confluent Cloud
+    /**
+     * Create topic in Confluent Cloud
+     */
     public static void createTopic(final String topic,
                                    final int partitions,
                                    final int replication,
@@ -110,6 +110,26 @@ public class KafkaTests
         try (final AdminClient adminClient = AdminClient.create(cloudConfig))
         {
             adminClient.createTopics(Collections.singletonList(newTopic)).all().get();
+        }
+        catch (final InterruptedException | ExecutionException e)
+        {
+            // Ignore if TopicExistsException, which may be valid if topic exists
+            if (!(e.getCause() instanceof TopicExistsException))
+            {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    /**
+     * Deletes a topic from Confluent Cloud
+     */
+    public static void deleteTopic(final String topic,
+                                   final Properties cloudConfig)
+    {
+        try (final AdminClient adminClient = AdminClient.create(cloudConfig))
+        {
+            adminClient.deleteTopics(Collections.singletonList(topic)).all().get();
         }
         catch (final InterruptedException | ExecutionException e)
         {
@@ -443,7 +463,6 @@ public class KafkaTests
     public void kTableExample() throws IOException, InterruptedException
     {
         final String topic = "test1";
-        final String outputTopic = topic + "-modified";
 
         // Define the properties that we need for this test:
         // NOTE: You can get these properties by going to the "Tools and client config" page of your cluster in confluent cloud.
@@ -472,13 +491,11 @@ public class KafkaTests
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
 
-        // Make sure that the output topic exists:
-        createTopic(outputTopic, 1, 3, props);
-
         // Confluent Cloud doesn't allow auto creation of topics! Bleh!
         // https://riferrei.com/2020/03/17/why-the-property-auto-create-topics-enable-is-disabled-in-confluent-cloud/
         // Therefore, we need to create the intermediate topics that we need for the KTables:
-        createTopic(APPLICATION_ID + "KSTREAM-AGGREGATE-STATE-STORE-0000000001-changelog", 1, 3, props);
+        // String INTERMEDIATE_TOPIC_NAME = APPLICATION_ID + "KSTREAM-AGGREGATE-STATE-STORE-0000000001-changelog";
+       // createTopic(INTERMEDIATE_TOPIC_NAME, 1, 3, props);
 
         // We also need to set properties to match the created topic settings so we don't get exceptions. Bleh!
         // https://stackoverflow.com/a/59532310/231860
@@ -525,7 +542,11 @@ public class KafkaTests
                     System.out.printf("%s:%,d Data Records%n", key, value);
                 });
 
-        final KafkaStreams streams = new KafkaStreams(builder.build(), props);
+        // Build the topology:
+        Topology topology = builder.build();
+
+        // Create the streams for the topology:
+        final KafkaStreams streams = new KafkaStreams(topology, props);
         // Always (and unconditionally) clean local state prior to starting the processing topology.
         // We opt for this unconditional call here because this will make it easier for you to play around with the example
         // when resetting the application for doing a re-run (via the Application Reset Tool,
@@ -564,5 +585,39 @@ public class KafkaTests
 
         // Gracefully close Kafka Streams:
         streams.close();
+
+        // Clean up the streams:
+        streams.cleanUp();
+
+        // Get the description of the topology so that we can clean up the temporary topics:
+        TopologyDescription topologyDescription = topology.describe();
+
+        // Delete the temporary topic that we created:
+        for (TopologyDescription.Subtopology subtopology : topologyDescription.subtopologies())
+        {
+            for (TopologyDescription.Node node : subtopology.nodes())
+            {
+                if (node instanceof InternalTopologyBuilder.Processor)
+                {
+                    InternalTopologyBuilder.Processor processor = (InternalTopologyBuilder.Processor) node;
+                    for (String storeName : ((InternalTopologyBuilder.Processor) node).stores())
+                    {
+                        // Create the topic name for this store:
+                        // NOTE this comes from the KTable.count() documentation:
+                        // For failure and recovery the store will be backed by an internal changelog topic that will be created in Kafka.
+                        // The changelog topic will be named "${applicationId}-${internalStoreName}-changelog",
+                        // where "applicationId" is user-specified in StreamsConfig via parameter APPLICATION_ID_CONFIG,
+                        // "internalStoreName" is an internal name
+                        // and "-changelog" is a fixed suffix.
+                        // Note that the internal store name may not be queryable through Interactive Queries.
+                        // You can retrieve all generated internal topic names via Topology.describe().
+                        String topicName = APPLICATION_ID + "-" + storeName + "-changelog";
+
+                        // Delete the topic:
+                        deleteTopic(topicName, props);
+                    }
+                }
+            }
+        }
     }
 }
