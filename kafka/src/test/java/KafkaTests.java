@@ -1,4 +1,6 @@
+import io.confluent.kafka.serializers.KafkaJsonDeserializer;
 import io.confluent.kafka.serializers.KafkaJsonDeserializerConfig;
+import io.confluent.kafka.serializers.KafkaJsonSerializer;
 import org.apache.kafka.clients.admin.AdminClient;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.*;
@@ -6,6 +8,15 @@ import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.TopicExistsException;
+import org.apache.kafka.common.serialization.Serde;
+import org.apache.kafka.common.serialization.Serdes;
+import org.apache.kafka.streams.KafkaStreams;
+import org.apache.kafka.streams.KeyValue;
+import org.apache.kafka.streams.StreamsBuilder;
+import org.apache.kafka.streams.StreamsConfig;
+import org.apache.kafka.streams.kstream.Consumed;
+import org.apache.kafka.streams.kstream.KStream;
+import org.apache.kafka.streams.kstream.Produced;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileInputStream;
@@ -16,6 +27,8 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
@@ -292,5 +305,133 @@ public class KafkaTests
         {
             consumer.close();
         }
+    }
+
+    /**
+     * An example of using the streams API.
+     * Inspired by:
+     * https://github.com/confluentinc/kafka-streams-examples/blob/6.0.1-post/src/main/java/io/confluent/examples/streams/MapFunctionLambdaExample.java
+     */
+    @Test
+    public void streamsExample() throws IOException, InterruptedException
+    {
+        final String topic = "test1";
+        final String outputTopic = topic + "-modified";
+
+        // Define the properties that we need for this test:
+        // NOTE: You can get these properties by going to the "Tools and client config" page of your cluster in confluent cloud.
+        // The instructions from the example web page were:
+        //      Load properties from a local configuration file
+        //      Create the configuration file (e.g. at '$HOME/.confluent/java.config') with configuration parameters
+        //      to connect to your Kafka cluster, which can be on your local host, Confluent Cloud, or any other cluster.
+        //      Follow these instructions to create this file: https://docs.confluent.io/current/tutorials/examples/clients/docs/java.html
+        // To make the unit test stand-alone, we replicate the contents in this test and use environment variables for the sensitive data.
+        // Make sure to set the following environment variables
+        final Properties props = loadConfig(Path.of(".", "config", "java.config"));
+
+        // Add additional properties.
+        // Specify default (de)serializers for record keys and for record values.
+        props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+        props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+
+        // Give the Streams application a unique name.  The name must be unique in the Kafka cluster
+        // against which the application is run.
+        props.put(StreamsConfig.APPLICATION_ID_CONFIG, "map-function-lambda-example" + System.nanoTime());
+        props.put(StreamsConfig.CLIENT_ID_CONFIG, "map-function-lambda-example-client");
+
+        // NOTE: The following doesn't reset the offset each time, only when the server doesn't have the consumers last offset from the previous run:
+        // https://stackoverflow.com/a/65582541/231860
+        props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+
+
+        // Make sure that the output topic exists:
+        createTopic(outputTopic, 1, 3, props);
+
+        // Set up serializers and deserializers, which we will use for overriding the default serdes
+        // specified above.
+        final Serde<String> stringSerde = Serdes.String();
+        KafkaJsonSerializer<DataRecord> dataRecordSerializer = new KafkaJsonSerializer<>();
+        KafkaJsonDeserializer<DataRecord> dataRecordDeserializer = new KafkaJsonDeserializer<>();
+        Map<String, Object> dataRecordConfigMap = Map.of(KafkaJsonDeserializerConfig.JSON_VALUE_TYPE, DataRecord.class);
+        dataRecordSerializer.configure(dataRecordConfigMap, false);
+        dataRecordDeserializer.configure(dataRecordConfigMap, false);
+        Serde<DataRecord> dataRecordSerde = Serdes.serdeFrom(dataRecordSerializer, dataRecordDeserializer);
+
+        // In the subsequent lines we define the processing topology of the Streams application.
+        final StreamsBuilder builder = new StreamsBuilder();
+
+        // Read the input Kafka topic into a KStream instance.
+        final KStream<String, DataRecord> dataRecordStream = builder.stream(topic, Consumed.with(stringSerde, dataRecordSerde));
+
+        // Keep track of the last time we processed data:
+        AtomicLong lastTimestamp = new AtomicLong(System.nanoTime());
+
+        // Keep track of how many records we have modified:
+        AtomicInteger count = new AtomicInteger();
+
+        // Variant 2: using `map`, modify value only (equivalent to variant 1)
+        final KStream<String, DataRecord> modifiedDataRecordStream = dataRecordStream.map(
+            (key, value) ->
+            {
+                // Update the last timestamp where we processed something:
+                lastTimestamp.set(System.nanoTime());
+
+                // Increment the count and check whether we want to print out progress:
+                if ((count.incrementAndGet() % 10_000) == 0)
+                {
+                    System.out.println("Record " + count.get());
+                }
+
+                // Modify the value:
+                return new KeyValue<>(key, new DataRecord(-value.getCount()));
+            }
+        );
+
+        // Write (i.e. persist) the results to a new Kafka topic.
+        //
+        // In this case we can rely on the default serializers for keys and values because their data
+        // types did not change, i.e. we only need to provide the name of the output topic.
+        modifiedDataRecordStream.to(outputTopic, Produced.with(stringSerde, dataRecordSerde));
+
+        final KafkaStreams streams = new KafkaStreams(builder.build(), props);
+        // Always (and unconditionally) clean local state prior to starting the processing topology.
+        // We opt for this unconditional call here because this will make it easier for you to play around with the example
+        // when resetting the application for doing a re-run (via the Application Reset Tool,
+        // http://docs.confluent.io/current/streams/developer-guide.html#application-reset-tool).
+        //
+        // The drawback of cleaning up local state prior is that your app must rebuilt its local state from scratch, which
+        // will take time and will require reading all the state-relevant data from the Kafka cluster over the network.
+        // Thus in a production scenario you typically do not want to clean up always as we do here but rather only when it
+        // is truly needed, i.e., only under certain conditions (e.g., the presence of a command line flag for your app).
+        // See `ApplicationResetExample.java` for a production-like example.
+        streams.cleanUp();
+
+        streams.setStateListener(
+            (newState, oldState) ->
+            {
+                System.out.printf("%s->%s%n", newState, oldState);
+            });
+
+
+
+        // Reset the timer:
+        lastTimestamp.set(System.nanoTime());
+
+        streams.start();
+
+        while (true)
+        {
+            // Wait a bit:
+            Thread.sleep(1_000);
+
+            // Check when the last time was that we got a value:
+            long now = System.nanoTime();
+            long lastModification = lastTimestamp.get();
+            long delta = now - lastModification;
+            if (delta > 10_000_000_000L) break;
+        }
+
+        // Gracefully close Kafka Streams:
+        streams.close();
     }
 }
