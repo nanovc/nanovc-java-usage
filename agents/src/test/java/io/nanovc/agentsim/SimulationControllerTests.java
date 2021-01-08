@@ -1,4 +1,4 @@
-package io.nanovc.agents;
+package io.nanovc.agentsim;
 
 import org.junit.jupiter.api.Test;
 
