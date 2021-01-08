@@ -6,6 +6,7 @@ rootProject.name = rootName
 // Define sub project names:
 def subProjects = [
         'core',
+        'agents',
 ];
 
 // https://stackoverflow.com/questions/20128416/gradle-subproject-name-different-than-folder-name
