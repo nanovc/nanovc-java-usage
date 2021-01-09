@@ -2,8 +2,16 @@ package io.nanovc.agentsim.aws;
 
 import io.nanovc.agentsim.*;
 
-public class AWSAgent extends AgentBase<AWSAgentConfig>
+public class AWSAgent extends AgentBase<AWSAgent.Config>
 {
+    /**
+     * The config for an AWS Agent.
+     */
+    public static class Config extends AgentConfigBase
+    {
+
+    }
+
     /**
      * This allows the agent to modify the environment for an iteration.
      *
@@ -14,7 +22,10 @@ public class AWSAgent extends AgentBase<AWSAgentConfig>
      * @param config     The agent configuration.
      * @throws Exception When an error occurs with the agent modifying the environment.
      */
-    @Override public void modifyEnvironment(ReadOnlyEnvironmentController input, EnvironmentController output, SimulationIterationAPI iteration, SimulationController simulation, AWSAgentConfig config) throws Exception
+    @Override public void modifyEnvironment(ReadOnlyEnvironmentController input, EnvironmentController output, SimulationIterationAPI iteration, SimulationController simulation, Config config) throws Exception
     {
+
     }
+
+
 }

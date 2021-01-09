@@ -76,10 +76,15 @@ public class Activator
 
         // Get the new class name that we want:
         String className = c.getName();
-        className = className.replace(searchString, replacementString);
-        Class classToCreate = null;
 
-        classToCreate = Class.forName(className);
+        // Strip off the inner static class separator '$' if there is one:
+        className = className.replace("$", "");
+
+        // Perform the replacement:
+        className = className.replace(searchString, replacementString);
+
+        // Lookup the class that we want to create:
+        Class classToCreate = Class.forName(className);
 
         // Search for a constructor that takes the object:
         Constructor[] constructors = classToCreate.getConstructors();

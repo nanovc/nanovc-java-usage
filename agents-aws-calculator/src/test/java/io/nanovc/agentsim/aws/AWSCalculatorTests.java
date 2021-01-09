@@ -4,7 +4,10 @@ import io.nanovc.agentsim.EnvironmentController;
 import io.nanovc.agentsim.simulations.memory.MemorySimulationHandlerTestsBase;
 import org.junit.jupiter.api.Test;
 
-class AWSAgentTests extends MemorySimulationHandlerTestsBase
+/**
+ * Test the AWS Pricing Calculator.
+ */
+class AWSCalculatorTests extends MemorySimulationHandlerTestsBase
 {
 
     @Test
@@ -15,9 +18,8 @@ class AWSAgentTests extends MemorySimulationHandlerTestsBase
         {
             //#region Input Model
 
-            // Create the agent configuration:
-            AWSAgent.Config agentConfig = new AWSAgent.Config();
-            controller.addAgentConfig(agentConfig);
+            // Create the environment for the test:
+
 
             //#endregion
         };
@@ -28,7 +30,7 @@ class AWSAgentTests extends MemorySimulationHandlerTestsBase
             "{\n" +
             "  \"agentConfigs\" : [\n" +
             "    {\n" +
-            "      \"type\" : \"io.nanovc.agentsim.aws.AWSAgent$Config\",\n" +
+            "      \"type\" : \"io.nanovc.agentsim.aws.AWSAgentConfig\",\n" +
             "      \"enabled\" : true\n" +
             "    }\n" +
             "  ]\n" +
@@ -41,7 +43,7 @@ class AWSAgentTests extends MemorySimulationHandlerTestsBase
             "{\n" +
             "  \"agentConfigs\" : [\n" +
             "    {\n" +
-            "      \"type\" : \"io.nanovc.agentsim.aws.AWSAgent$Config\",\n" +
+            "      \"type\" : \"io.nanovc.agentsim.aws.AWSAgentConfig\",\n" +
             "      \"enabled\" : true\n" +
             "    }\n" +
             "  ]\n" +
