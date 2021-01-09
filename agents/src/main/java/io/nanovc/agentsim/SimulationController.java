@@ -5,6 +5,7 @@ import io.nanovc.meh.*;
 /**
  * A controller that is used by each agent to control the progression of the simulation.
  * It also keeps the current state of the simulation, solution and iteration that the agent is on.
+ * This gives each agent an intuitive API to work with the simulation being run.
  * <p>
  * A {@link ModelEngineHandlerConcepts#CONTROLLER controller} is the {@link ModelEngineHandlerConcepts#HANDLER handler} and {@link ModelEngineHandlerConcepts#ENGINE engine} combined.
  * This follows {@link MEHPatterns#MODEL_CONTROLLER architecture 4 } of the {@link MEHPatterns MEH Pattern}.
