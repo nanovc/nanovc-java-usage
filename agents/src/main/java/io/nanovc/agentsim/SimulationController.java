@@ -7,7 +7,7 @@ import io.nanovc.meh.*;
  * It also keeps the current state of the simulation, solution and iteration that the agent is on.
  * This gives each agent an intuitive API to work with the simulation being run.
  * <p>
- * A {@link ModelEngineHandlerConcepts#CONTROLLER controller} is the {@link ModelEngineHandlerConcepts#HANDLER handler} and {@link ModelEngineHandlerConcepts#ENGINE engine} combined.
+ * A {@link MEHConcepts#CONTROLLER controller} is the {@link MEHConcepts#HANDLER handler} and {@link MEHConcepts#ENGINE engine} combined.
  * This follows {@link MEHPatterns#MODEL_CONTROLLER architecture 4 } of the {@link MEHPatterns MEH Pattern}.
  */
 public class SimulationController

@@ -1,14 +1,14 @@
 package io.nanovc.agentsim;
 
-import io.nanovc.meh.ModelEngineHandlerConcepts;
+import io.nanovc.meh.MEHConcepts;
 
 /**
  * A read-only controller for environments.
  * This is useful so that we can interrogate an environment but we can't change it.
  * NOTE: If you reference and modify the model outside of this controller,
  *       then we can't stop you from modifying it by reference.
- * The {@link ModelEngineHandlerConcepts#CONTROLLER controller} for {@link EnvironmentModel}'s.
- * A {@link ModelEngineHandlerConcepts#CONTROLLER controller} is the {@link ModelEngineHandlerConcepts#HANDLER handler} and {@link ModelEngineHandlerConcepts#ENGINE engine} combined.
+ * The {@link MEHConcepts#CONTROLLER controller} for {@link EnvironmentModel}'s.
+ * A {@link MEHConcepts#CONTROLLER controller} is the {@link MEHConcepts#HANDLER handler} and {@link MEHConcepts#ENGINE engine} combined.
  * This follows {@link io.nanovc.meh.MEHPatterns#MODEL_CONTROLLER architecture 4 } of the {@link io.nanovc.meh.MEHPatterns MEH Pattern}.
  */
 public class ReadOnlyEnvironmentController extends EnvironmentController

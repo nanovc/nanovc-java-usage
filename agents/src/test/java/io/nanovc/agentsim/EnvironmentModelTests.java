@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 /**
  * Tests the {@link EnvironmentModel}.
  */
-public class EnvironmentModelTests
+public class EnvironmentModelTests extends EnvironmentModelTestsBase
 {
     @Test
     public void creationTest()

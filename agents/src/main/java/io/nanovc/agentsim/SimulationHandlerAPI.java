@@ -5,7 +5,7 @@ import io.nanovc.meh.*;
 /**
  * The API for a simulation handler.
  * <p>
- * This captures the public API between the {@link ModelEngineHandlerConcepts#HANDLER handler} and code running simulations.
+ * This captures the public API between the {@link MEHConcepts#HANDLER handler} and code running simulations.
  * This follows {@link MEHPatterns#MODEL_ENGINE_HANDLER architecture 3} of the {@link MEHPatterns MEH Pattern}.
  *
  * @param <TConfig>     The specific type of configuration that the simulation takes.

@@ -193,7 +193,7 @@ class EnvironmentControllerTests extends EnvironmentControllerTestsBase
     public static class MockAgent extends AgentBase<MockAgentConfig>
     {
         @Override
-        public void modifyEnvironment(ReadOnlyEnvironmentController inputModelController, EnvironmentController outputModelControllerToModify, SimulationIterationAPI iteration, SimulationController simulation, MockAgentConfig mockAgentConfig) throws Exception
+        public void modifyEnvironment(ReadOnlyEnvironmentController input, EnvironmentController output, SimulationIterationAPI iteration, SimulationController simulation, MockAgentConfig mockAgentConfig) throws Exception
         {
         }
     }

@@ -3,7 +3,7 @@ package io.nanovc.meh;
 /**
  * Concepts used to define the Model-Engine-Handler unification of architectural patterns.
  */
-public enum ModelEngineHandlerConcepts
+public enum MEHConcepts
 {
     MODEL,
     ENGINE,

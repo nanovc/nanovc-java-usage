@@ -1,7 +1,7 @@
 package io.nanovc.meh;
 
 /**
- * This defines the known {@link ModelEngineHandlerConcepts} patterns of architecture.
+ * This defines the known {@link MEHConcepts} patterns of architecture.
  */
 public enum MEHPatterns
 {
@@ -12,9 +12,9 @@ public enum MEHPatterns
      * <li>What is interesting is that you can loop architecture 3 ({@link #MODEL_ENGINE_HANDLER}) back to architecture 1 ({@link #OOP}) as a convenience sugar.
      * You subclass the xModelAPI or xModelBase, you implement the xHandlerAPI and you delegate the implementation to an xEngineAPI.</li>
      * <p>
-     * For a detailed diagram and description, see: {@link ModelEngineHandlerConcepts#OOP}.
+     * For a detailed diagram and description, see: {@link MEHConcepts#OOP}.
      *
-     * @see ModelEngineHandlerConcepts#OOP
+     * @see MEHConcepts#OOP
      */
     OOP(1, "Object Oriented Programming"),
 
@@ -26,9 +26,9 @@ public enum MEHPatterns
      * <li>Used for unit tests, ...</li>
      * <li>Engine ~ "Strategy"</li>
      * <p>
-     * For a detailed diagram and description, see: {@link ModelEngineHandlerConcepts#MODEL_ENGINE}.
+     * For a detailed diagram and description, see: {@link MEHConcepts#MODEL_ENGINE}.
      *
-     * @see ModelEngineHandlerConcepts#MODEL_ENGINE
+     * @see MEHConcepts#MODEL_ENGINE
      */
     MODEL_ENGINE(2, "Model + Engine"),
 
@@ -41,9 +41,9 @@ public enum MEHPatterns
      * <li>This design is the most onerous for the library writer but it gives us the most flexibility to model any arbitrary approach in the private API's (Engines).</li>
      * <li>The naming convention is to have xModelAPI, xModelBase, xHandlerAPI, xHandlerBase, xEngineAPI, xEngineBase for each implementation option. That's a lot of overhead but it's worth it for the extensibility.</li>
      * <p>
-     * For a detailed diagram and description, see: {@link ModelEngineHandlerConcepts#MODEL_ENGINE_HANDLER}.
+     * For a detailed diagram and description, see: {@link MEHConcepts#MODEL_ENGINE_HANDLER}.
      *
-     * @see ModelEngineHandlerConcepts#MODEL_ENGINE_HANDLER
+     * @see MEHConcepts#MODEL_ENGINE_HANDLER
      */
     MODEL_ENGINE_HANDLER(3, "Model + Engine + Handler"),
 
@@ -55,9 +55,9 @@ public enum MEHPatterns
      * <li>This option is good when there is ONLY ONE implementation required but we want to keep the model clean and simple. The context in the controller is where the "working set" is placed for the model.</li>
      * <li>You don't need interfaces and base classes with this option because there is only one implementation that makes sense at a time.</li>
      * <p>
-     * For a detailed diagram and description, see: {@link ModelEngineHandlerConcepts#MODEL_CONTROLLER}.
+     * For a detailed diagram and description, see: {@link MEHConcepts#MODEL_CONTROLLER}.
      *
-     * @see ModelEngineHandlerConcepts#MODEL_CONTROLLER
+     * @see MEHConcepts#MODEL_CONTROLLER
      */
     MODEL_CONTROLLER(4, "Model + Controller"),
     ;
@@ -73,7 +73,7 @@ public enum MEHPatterns
     public final String patternName;
 
     /**
-     * Defines a new pattern for the {@link ModelEngineHandlerConcepts}.
+     * Defines a new pattern for the {@link MEHConcepts}.
      *
      * @param patternNumber The pattern number that we refer to in relation to the other patterns.
      * @param patternName   The full name of this pattern.

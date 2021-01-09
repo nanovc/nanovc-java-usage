@@ -7,9 +7,9 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 /**
- * The {@link ModelEngineHandlerConcepts#CONTROLLER controller} for {@link EnvironmentModel}'s.
+ * The {@link MEHConcepts#CONTROLLER controller} for {@link EnvironmentModel}'s.
  * <p>
- * A {@link ModelEngineHandlerConcepts#CONTROLLER controller} is the {@link ModelEngineHandlerConcepts#HANDLER handler} and {@link ModelEngineHandlerConcepts#ENGINE engine} combined.
+ * A {@link MEHConcepts#CONTROLLER controller} is the {@link MEHConcepts#HANDLER handler} and {@link MEHConcepts#ENGINE engine} combined.
  * This follows {@link MEHPatterns#MODEL_CONTROLLER architecture 4 } of the {@link MEHPatterns MEH Pattern}.
  */
 public class EnvironmentController
