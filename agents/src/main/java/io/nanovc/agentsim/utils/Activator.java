@@ -77,14 +77,30 @@ public class Activator
         // Get the new class name that we want:
         String className = c.getName();
 
-        // Strip off the inner static class separator '$' if there is one:
-        className = className.replace("$", "");
-
         // Perform the replacement:
         className = className.replace(searchString, replacementString);
 
-        // Lookup the class that we want to create:
-        Class classToCreate = Class.forName(className);
+        Class classToCreate;
+
+        try
+        {
+            // Lookup the class that we want to create:
+            classToCreate = Class.forName(className);
+        }
+        catch (ClassNotFoundException classNotFoundException)
+        {
+            // Try the alternate naming strategy where the config is an inner static class of the agent:
+            className = c.getName();
+
+            // Strip off the inner static class separator '$' if there is one:
+            className = className.replace("$", "");
+
+            // Perform the replacement:
+            className = className.replace(searchString, replacementString);
+
+            // Lookup the class that we want to create:
+            classToCreate = Class.forName(className);
+        }
 
         // Search for a constructor that takes the object:
         Constructor[] constructors = classToCreate.getConstructors();

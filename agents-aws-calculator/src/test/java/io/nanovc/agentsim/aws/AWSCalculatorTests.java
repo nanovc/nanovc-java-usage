@@ -27,27 +27,13 @@ class AWSCalculatorTests extends MemorySimulationHandlerTestsBase
         // Make sure the model is as expected:
         //language=JSON
         String expectedInputJSON =
-            "{\n" +
-            "  \"agentConfigs\" : [\n" +
-            "    {\n" +
-            "      \"type\" : \"io.nanovc.agentsim.aws.AWSAgentConfig\",\n" +
-            "      \"enabled\" : true\n" +
-            "    }\n" +
-            "  ]\n" +
-            "}";
+            "{ }";
 
         // Make sure that the output model is as expected:
         // Make sure the model is as expected:
         //language=JSON
         String expectedOutputJSON =
-            "{\n" +
-            "  \"agentConfigs\" : [\n" +
-            "    {\n" +
-            "      \"type\" : \"io.nanovc.agentsim.aws.AWSAgentConfig\",\n" +
-            "      \"enabled\" : true\n" +
-            "    }\n" +
-            "  ]\n" +
-            "}";
+            "{ }";
 
         assert_InputJSON_Simulation_OutputJSON(inputModelCreator, expectedInputJSON, expectedOutputJSON);
     }
