@@ -281,7 +281,7 @@ public class MemorySimulationHandlerTests_AgentThinksItsFirst extends MemorySimu
     }
 
     @Test
-    public void twoAgentsWithOneModel() throws Exception
+    public void twoAgentsWithOneModel_FirstSolution() throws Exception
     {
         // Define the input model using code:
         ConsumerWithException<EnvironmentController> inputModelCreator = controller ->
@@ -373,6 +373,104 @@ public class MemorySimulationHandlerTests_AgentThinksItsFirst extends MemorySimu
         assert_InputJSON_Simulation_OutputJSON(
             inputModelCreator,
             expectedInputJSON,
+            expectedOutputJSON
+        );
+    }
+
+    @Test
+    public void twoAgentsWithOneModel_TwoSolutions() throws Exception
+    {
+        // Define the input model using code:
+        ConsumerWithException<EnvironmentController> inputModelCreator = controller ->
+        {
+            //#region Input Model
+
+            AgentConfig agent1Config = new AgentConfig();
+            agent1Config.modelNameToManipulate = "data";
+            agent1Config.expectedValueBeforeManipulating = "abc 123";
+            agent1Config.valueToSet = "value 1";
+            controller.addAgentConfig(agent1Config);
+
+            AgentConfig agent2Config = new AgentConfig();
+            agent2Config.modelNameToManipulate = "data";
+            agent2Config.expectedValueBeforeManipulating = "abc 123";
+            agent2Config.valueToSet = "value 2";
+            controller.addAgentConfig(agent2Config);
+
+            AgentModel dataModel = new AgentModel();
+            dataModel.name = "data";
+            dataModel.data = "abc 123";
+            controller.addModel(dataModel);
+
+            //#endregion
+        };
+
+        // Make sure that the output model is as expected:
+        //#region Output JSON
+        //language=JSON
+        String expectedOutputJSON =
+            "[\n" +
+            "  {\n" +
+            "    \"solutionName\" : \"Solution 1\",\n" +
+            "    \"environment\" : {\n" +
+            "      \"models\" : [\n" +
+            "        {\n" +
+            "          \"type\" : \"io.nanovc.agentsim.simulations.memory.MemorySimulationHandlerTests_AgentThinksItsFirst$AgentModel\",\n" +
+            "          \"name\" : \"data\",\n" +
+            "          \"data\" : \"value 2\"\n" +
+            "        }\n" +
+            "      ],\n" +
+            "      \"agentConfigs\" : [\n" +
+            "        {\n" +
+            "          \"type\" : \"io.nanovc.agentsim.simulations.memory.MemorySimulationHandlerTests_AgentThinksItsFirst$AgentConfig\",\n" +
+            "          \"modelNameToManipulate\" : \"data\",\n" +
+            "          \"expectedValueBeforeManipulating\" : \"abc 123\",\n" +
+            "          \"valueToSet\" : \"value 1\",\n" +
+            "          \"enabled\" : true\n" +
+            "        },\n" +
+            "        {\n" +
+            "          \"type\" : \"io.nanovc.agentsim.simulations.memory.MemorySimulationHandlerTests_AgentThinksItsFirst$AgentConfig\",\n" +
+            "          \"modelNameToManipulate\" : \"data\",\n" +
+            "          \"expectedValueBeforeManipulating\" : \"abc 123\",\n" +
+            "          \"valueToSet\" : \"value 2\",\n" +
+            "          \"enabled\" : true\n" +
+            "        }\n" +
+            "      ]\n" +
+            "    }\n" +
+            "  },\n" +
+            "  {\n" +
+            "    \"solutionName\" : \"Solution 2\",\n" +
+            "    \"environment\" : {\n" +
+            "      \"models\" : [\n" +
+            "        {\n" +
+            "          \"type\" : \"io.nanovc.agentsim.simulations.memory.MemorySimulationHandlerTests_AgentThinksItsFirst$AgentModel\",\n" +
+            "          \"name\" : \"data\",\n" +
+            "          \"data\" : \"value 1\"\n" +
+            "        }\n" +
+            "      ],\n" +
+            "      \"agentConfigs\" : [\n" +
+            "        {\n" +
+            "          \"type\" : \"io.nanovc.agentsim.simulations.memory.MemorySimulationHandlerTests_AgentThinksItsFirst$AgentConfig\",\n" +
+            "          \"modelNameToManipulate\" : \"data\",\n" +
+            "          \"expectedValueBeforeManipulating\" : \"abc 123\",\n" +
+            "          \"valueToSet\" : \"value 1\",\n" +
+            "          \"enabled\" : true\n" +
+            "        },\n" +
+            "        {\n" +
+            "          \"type\" : \"io.nanovc.agentsim.simulations.memory.MemorySimulationHandlerTests_AgentThinksItsFirst$AgentConfig\",\n" +
+            "          \"modelNameToManipulate\" : \"data\",\n" +
+            "          \"expectedValueBeforeManipulating\" : \"abc 123\",\n" +
+            "          \"valueToSet\" : \"value 2\",\n" +
+            "          \"enabled\" : true\n" +
+            "        }\n" +
+            "      ]\n" +
+            "    }\n" +
+            "  }\n" +
+            "]";
+        //#endregion
+
+        assert_Simulation_OutputJSONSolutions(
+            inputModelCreator,
             expectedOutputJSON
         );
     }
