@@ -35,9 +35,7 @@ class OrganizationTests extends AWSTestsBase
             "{\n" +
             "  \"type\" : \"io.nanovc.agentsim.aws.organizations.Organization\",\n" +
             "  \"root\" : {\n" +
-            "    \"managementAccount\" : {\n" +
-            "      \"type\" : \"io.nanovc.agentsim.aws.organizations.ManagementAccount\"\n" +
-            "    }\n" +
+            "    \"managementAccount\" : { }\n" +
             "  }\n" +
             "}";
         assertEquals(expectedJSON, getJSON(organization));
@@ -66,9 +64,7 @@ class OrganizationTests extends AWSTestsBase
             "        \"accountName\" : \"Resources\"\n" +
             "      }\n" +
             "    ],\n" +
-            "    \"managementAccount\" : {\n" +
-            "      \"type\" : \"io.nanovc.agentsim.aws.organizations.ManagementAccount\"\n" +
-            "    }\n" +
+            "    \"managementAccount\" : { }\n" +
             "  }\n" +
             "}";
         assertEquals(expectedJSON, getJSON(organization));
@@ -141,9 +137,7 @@ class OrganizationTests extends AWSTestsBase
             "        \"organizationalUnitName\" : \"client 2\"\n" +
             "      }\n" +
             "    ],\n" +
-            "    \"managementAccount\" : {\n" +
-            "      \"type\" : \"io.nanovc.agentsim.aws.organizations.ManagementAccount\"\n" +
-            "    }\n" +
+            "    \"managementAccount\" : { }\n" +
             "  }\n" +
             "}";
         assertEquals(expectedJSON, getJSON(organization));

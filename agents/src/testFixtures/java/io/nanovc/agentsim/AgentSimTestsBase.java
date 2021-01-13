@@ -23,6 +23,7 @@ public class AgentSimTestsBase
         jsonMapper = JsonMapper.builder()
             .enable(SerializationFeature.INDENT_OUTPUT)
             .serializationInclusion(JsonInclude.Include.NON_DEFAULT)
+            .disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
             .build();
 
         // Configure the pretty printer to use a new line character only. This helps with cross platform unit tests:

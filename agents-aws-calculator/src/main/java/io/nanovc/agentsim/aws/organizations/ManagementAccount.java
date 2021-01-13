@@ -1,7 +1,5 @@
 package io.nanovc.agentsim.aws.organizations;
 
-import io.nanovc.agentsim.aws.AWSAccount;
-
 /**
  * An {@link Organization organization} has one {@link ManagementAccount management account} along with zero or more {@link MemberAccount member accounts}.
  * <p>
@@ -28,6 +26,6 @@ import io.nanovc.agentsim.aws.AWSAccount;
  * https://docs.aws.amazon.com/organizations/latest/userguide/orgs_getting-started_concepts.html#org
  * https://docs.aws.amazon.com/organizations/latest/userguide/orgs_getting-started_concepts.html#account
  */
-public class ManagementAccount extends AWSAccount
+public class ManagementAccount extends Account
 {
 }
