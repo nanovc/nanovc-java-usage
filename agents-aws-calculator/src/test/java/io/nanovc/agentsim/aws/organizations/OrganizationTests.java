@@ -115,6 +115,8 @@ class OrganizationTests extends AWSTestsBase
             "  \"root\" : {\n" +
             "    \"children\" : [\n" +
             "      {\n" +
+            "        \"type\" : \"io.nanovc.agentsim.aws.organizations.OrganizationalUnit\",\n" +
+            "        \"organizationalUnitName\" : \"client 1\",\n" +
             "        \"accounts\" : [\n" +
             "          {\n" +
             "            \"accountName\" : \"Client 1 QA\"\n" +
@@ -122,10 +124,11 @@ class OrganizationTests extends AWSTestsBase
             "          {\n" +
             "            \"accountName\" : \"Client 1 Prod\"\n" +
             "          }\n" +
-            "        ],\n" +
-            "        \"organizationalUnitName\" : \"client 1\"\n" +
+            "        ]\n" +
             "      },\n" +
             "      {\n" +
+            "        \"type\" : \"io.nanovc.agentsim.aws.organizations.OrganizationalUnit\",\n" +
+            "        \"organizationalUnitName\" : \"client 2\",\n" +
             "        \"accounts\" : [\n" +
             "          {\n" +
             "            \"accountName\" : \"Client 2 QA\"\n" +
@@ -133,8 +136,7 @@ class OrganizationTests extends AWSTestsBase
             "          {\n" +
             "            \"accountName\" : \"Client 2 Prod\"\n" +
             "          }\n" +
-            "        ],\n" +
-            "        \"organizationalUnitName\" : \"client 2\"\n" +
+            "        ]\n" +
             "      }\n" +
             "    ],\n" +
             "    \"managementAccount\" : { }\n" +

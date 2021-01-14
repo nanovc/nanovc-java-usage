@@ -27,7 +27,7 @@ public class OrganizationalUnitBase
     public List<MemberAccount> accounts = new ArrayList<>();
 
     /**
-     * The child {@link OrganizationalUnitBase organizational units} in this {@link Organization organization}.
+     * The child {@link OrganizationalUnit organizational units} in this {@link Organization organization}.
      */
-    public List<OrganizationalUnitBase> children = new ArrayList<>();
+    public List<OrganizationalUnit> children = new ArrayList<>();
 }

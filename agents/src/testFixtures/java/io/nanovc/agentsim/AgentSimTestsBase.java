@@ -14,7 +14,7 @@ import org.junit.jupiter.api.BeforeAll;
  */
 public class AgentSimTestsBase
 {
-    private static JsonMapper jsonMapper;
+    protected static JsonMapper jsonMapper;
 
     @BeforeAll
     public static void createJSONMapper()

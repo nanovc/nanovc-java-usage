@@ -1,6 +1,7 @@
 package io.nanovc.agentsim.aws;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.nanovc.agentsim.aws.organizations.MemberAccount;
 import io.nanovc.agentsim.aws.organizations.Organization;
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +39,7 @@ class AWSCloudControllerTests extends AWSTestsBase
         Organization companyOrganization = awsCloudController.getOrCreateOrganization("Company");
 
         // Create a Prod account in the organization:
-     //   MemberAccount prodAccount = awsCloudController.createAccount("Company", "A", "B", "Prod");
+        MemberAccount prodAccount = awsCloudController.getOrCreateAccount("Company", "A", "B", "Prod");
 
         // Make sure the AWS cloud instance is as expected:
         expectedJSON =
@@ -50,12 +51,28 @@ class AWSCloudControllerTests extends AWSTestsBase
             "      \"type\" : \"io.nanovc.agentsim.aws.organizations.Organization\",\n" +
             "      \"name\" : \"Company\",\n" +
             "      \"root\" : {\n" +
+            "        \"children\" : [\n" +
+            "          {\n" +
+            "            \"type\" : \"io.nanovc.agentsim.aws.organizations.OrganizationalUnit\",\n" +
+            "            \"organizationalUnitName\" : \"A\",\n" +
+            "            \"children\" : [\n" +
+            "              {\n" +
+            "                \"type\" : \"io.nanovc.agentsim.aws.organizations.OrganizationalUnit\",\n" +
+            "                \"organizationalUnitName\" : \"B\",\n" +
+            "                \"accounts\" : [\n" +
+            "                  {\n" +
+            "                    \"accountName\" : \"Prod\"\n" +
+            "                  }\n" +
+            "                ]\n" +
+            "              }\n" +
+            "            ]\n" +
+            "          }\n" +
+            "        ],\n" +
             "        \"managementAccount\" : { }\n" +
             "      }\n" +
             "    }\n" +
             "  ]\n" +
             "}";
         assertEquals(expectedJSON, getJSON(awsCloudController.awsCloud));
-
     }
 }
