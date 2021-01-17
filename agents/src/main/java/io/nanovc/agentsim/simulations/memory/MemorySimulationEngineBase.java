@@ -3,6 +3,7 @@ package io.nanovc.agentsim.simulations.memory;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import io.nanovc.*;
@@ -10,18 +11,19 @@ import io.nanovc.agentsim.*;
 import io.nanovc.agentsim.utils.Activator;
 import io.nanovc.areas.ByteArrayHashMapArea;
 import io.nanovc.content.ByteArrayContent;
+import io.nanovc.meh.MEHConcepts;
+import io.nanovc.meh.MEHPatterns;
 import io.nanovc.memory.MemoryCommit;
 import io.nanovc.memory.bytes.ByteArrayNanoRepo;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import io.nanovc.meh.*;
 
 /**
  * A base class for an in-memory simulation engine.
@@ -221,11 +223,30 @@ public abstract class MemorySimulationEngineBase<
      * @param config     The simulation configuration to use.
      * @param jsonMapper The json mapper to configure.
      */
-    protected void configureJsonMapper(TConfig config, JsonMapper jsonMapper)
+    protected void configureJsonMapper(TConfig config, JsonMapper jsonMapper) throws SimulationException
     {
         // Make sure that we have neat indenting to help with debugging:
         jsonMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        jsonMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
         jsonMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+        // Register any additional modules:
+        List<Class<? extends Module>> moduleClasses = config.getSerializationModules();
+        for (Class<? extends Module> moduleClass : moduleClasses)
+        {
+            try
+            {
+                // Create an instance of the module:
+                Module module = Activator.createInstanceOfClass(moduleClass);
+
+                // Register the module:
+                jsonMapper.registerModule(module);
+            }
+            catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e)
+            {
+                throw new SimulationException("Could not create serialization module: " + moduleClass.getName(), e);
+            }
+        }
 
         // Use mixins to provide annotations for types that we don't control directly:
         // https://github.com/FasterXML/jackson-docs/wiki/JacksonMixInAnnotations
