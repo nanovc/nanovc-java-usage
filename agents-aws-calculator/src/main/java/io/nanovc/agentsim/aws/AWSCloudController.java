@@ -85,14 +85,13 @@ public class AWSCloudController
      *                         Any {@link OrganizationalUnit organizational units} along the way will automatically be created as needed.
      * @return The {@link OrganizationalUnit organizational unit (OU)} for the given {@link Organization organization} that was either there already or that was created.
      */
-    public OrganizationalUnit getOrCreateOrganizationalUnit(String organizationName, String... orgTreePath)
+    public OrganizationalUnitBase getOrCreateOrganizationalUnit(String organizationName, String... orgTreePath)
     {
         // Get the organization:
         Organization organization = getOrCreateOrganization(organizationName);
 
         // Walk each element of the organizational tree:
         OrganizationalUnitBase parentOU = organization.root;
-        OrganizationalUnit result = null;
         for (int i = 0; i < orgTreePath.length; i++)
         {
             // Get the part of the path we are on:
@@ -120,14 +119,11 @@ public class AWSCloudController
                         return ou;
                     });
 
-            // Flag this as the potential result:
-            result = organizationalUnit;
-
             // Make this the new parent OU for the next iteration:
             parentOU = organizationalUnit;
         }
 
-        return result;
+        return parentOU;
     }
 
     /**
@@ -148,7 +144,7 @@ public class AWSCloudController
         String[] path = Arrays.copyOf(orgTreePath, orgTreePath.length - 1);
 
         // Get the organizational unit for this path:
-        OrganizationalUnit organizationalUnit = getOrCreateOrganizationalUnit(organizationName, path);
+        OrganizationalUnitBase organizationalUnit = getOrCreateOrganizationalUnit(organizationName, path);
 
         // Strip off the last part of the orgTreePath because that is the account name:
         String accountName = orgTreePath[orgTreePath.length - 1];
