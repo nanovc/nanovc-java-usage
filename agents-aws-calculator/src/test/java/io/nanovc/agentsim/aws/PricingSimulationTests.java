@@ -4,12 +4,12 @@ import io.nanovc.agentsim.EnvironmentController;
 import io.nanovc.agentsim.aws.organizations.MemberAccount;
 import io.nanovc.agentsim.aws.organizations.Organization;
 import io.nanovc.agentsim.pricecalc.Clock;
+import io.nanovc.agentsim.pricecalc.TimeAgent;
 import io.nanovc.agentsim.pricecalc.Timeline;
 import io.nanovc.agentsim.simulations.memory.MemorySimulationHandlerTestsBase;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 
 /**
  * Tests a simulation of pricing AWS consumption using an Agent Based Framework.
@@ -43,17 +43,20 @@ class PricingSimulationTests extends AWSTestsBase
 
             // Create a clock for the simulation to capture the period of time that we start simulating at:
             Clock clock = new Clock();
-            clock.now.startInclusive = Instant.parse("2021-01-01T00:00:00Z");
-            clock.now.endExclusive = clock.now.startInclusive.plus(1, ChronoUnit.HOURS);
             controller.addModel(clock);
 
             // Create a time line that captures what periods of time have been simulated:
             Timeline timeline = new Timeline();
             controller.addModel(timeline);
 
+            // Create the Agent that controls simulation time:
+            TimeAgent.Config timeAgentConfig = new TimeAgent.Config();
+            controller.addAgentConfig(timeAgentConfig);
+
             AWSAgent.Config awsAgentConfig = new AWSAgent.Config();
-            awsAgentConfig.period.startInclusive = clock.now.startInclusive.plus(30, ChronoUnit.MINUTES);
-            awsAgentConfig.period.endExclusive = clock.now.startInclusive.plus(2, ChronoUnit.HOURS);
+            awsAgentConfig.agentName = "aws";
+            awsAgentConfig.period.startInclusive = Instant.parse("2021-01-01T00:30:00Z");
+            awsAgentConfig.period.endExclusive = Instant.parse("2021-01-01T02:00:00Z");
 
             controller.addAgentConfig(awsAgentConfig);
 
@@ -86,10 +89,7 @@ class PricingSimulationTests extends AWSTestsBase
             "    {\n" +
             "      \"type\" : \"io.nanovc.agentsim.pricecalc.Clock\",\n" +
             "      \"name\" : \"clock\",\n" +
-            "      \"now\" : {\n" +
-            "        \"startInclusive\" : \"2021-01-01T00:00:00Z\",\n" +
-            "        \"endExclusive\" : \"2021-01-01T01:00:00Z\"\n" +
-            "      }\n" +
+            "      \"now\" : { }\n" +
             "    },\n" +
             "    {\n" +
             "      \"type\" : \"io.nanovc.agentsim.pricecalc.Timeline\",\n" +
@@ -98,11 +98,16 @@ class PricingSimulationTests extends AWSTestsBase
             "  ],\n" +
             "  \"agentConfigs\" : [\n" +
             "    {\n" +
+            "      \"type\" : \"io.nanovc.agentsim.pricecalc.TimeAgent$Config\",\n" +
+            "      \"enabled\" : true\n" +
+            "    },\n" +
+            "    {\n" +
             "      \"type\" : \"io.nanovc.agentsim.aws.AWSAgent$Config\",\n" +
             "      \"period\" : {\n" +
             "        \"startInclusive\" : \"2021-01-01T00:30:00Z\",\n" +
             "        \"endExclusive\" : \"2021-01-01T02:00:00Z\"\n" +
             "      },\n" +
+            "      \"agentName\" : \"aws\",\n" +
             "      \"enabled\" : true\n" +
             "    }\n" +
             "  ]\n" +
@@ -134,30 +139,38 @@ class PricingSimulationTests extends AWSTestsBase
             "    },\n" +
             "    {\n" +
             "      \"type\" : \"io.nanovc.agentsim.pricecalc.Clock\",\n" +
-            "      \"name\" : \"clock\"\n" +
+            "      \"name\" : \"clock\",\n" +
+            "      \"now\" : {\n" +
+            "        \"startInclusive\" : \"2021-01-01T00:30:00Z\",\n" +
+            "        \"endExclusive\" : \"2021-01-01T02:00:00Z\"\n" +
+            "      }\n" +
+            "    },\n" +
+            "    {\n" +
+            "      \"type\" : \"io.nanovc.agentsim.pricecalc.PeriodOfInterestForAgent\",\n" +
+            "      \"name\" : \"period-of-interest-for-aws\",\n" +
+            "      \"period\" : {\n" +
+            "        \"startInclusive\" : \"2021-01-01T00:30:00Z\",\n" +
+            "        \"endExclusive\" : \"2021-01-01T02:00:00Z\"\n" +
+            "      },\n" +
+            "      \"agentName\" : \"aws\"\n" +
             "    },\n" +
             "    {\n" +
             "      \"type\" : \"io.nanovc.agentsim.pricecalc.Timeline\",\n" +
-            "      \"name\" : \"timeline\",\n" +
-            "      \"timeSlices\" : [\n" +
-            "        {\n" +
-            "          \"startInclusive\" : \"2021-01-01T00:30:00Z\",\n" +
-            "          \"endExclusive\" : \"2021-01-01T01:00:00Z\"\n" +
-            "        },\n" +
-            "        {\n" +
-            "          \"startInclusive\" : \"2021-01-01T01:00:00Z\",\n" +
-            "          \"endExclusive\" : \"2021-01-01T02:00:00Z\"\n" +
-            "        }\n" +
-            "      ]\n" +
+            "      \"name\" : \"timeline\"\n" +
             "    }\n" +
             "  ],\n" +
             "  \"agentConfigs\" : [\n" +
+            "    {\n" +
+            "      \"type\" : \"io.nanovc.agentsim.pricecalc.TimeAgent$Config\",\n" +
+            "      \"enabled\" : true\n" +
+            "    },\n" +
             "    {\n" +
             "      \"type\" : \"io.nanovc.agentsim.aws.AWSAgent$Config\",\n" +
             "      \"period\" : {\n" +
             "        \"startInclusive\" : \"2021-01-01T00:30:00Z\",\n" +
             "        \"endExclusive\" : \"2021-01-01T02:00:00Z\"\n" +
             "      },\n" +
+            "      \"agentName\" : \"aws\",\n" +
             "      \"enabled\" : true\n" +
             "    }\n" +
             "  ]\n" +

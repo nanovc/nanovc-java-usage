@@ -276,9 +276,9 @@ public class EnvironmentController
 
 
     /**
-     * A convenience method for going through each model in the environment model.
+     * A convenience method for going through each {@link ModelAPI model} in the {@link EnvironmentModel environment}.
      *
-     * @param modelConsumer The logic that consumes each model in the environment model.
+     * @param modelConsumer The logic that consumes each {@link ModelAPI model} in the {@link EnvironmentModel environment}.
      */
     public void forEachModel(Consumer<ModelAPI> modelConsumer)
     {
@@ -286,11 +286,11 @@ public class EnvironmentController
     }
 
     /**
-     * This iterates through each specific type of model or a sub class of it.
+     * This iterates through each specific type of {@link ModelAPI model} or a sub class of it.
      *
-     * @param modelTypeOrSubClass The specific type of model (or sub class) to iterate over in the environment.
-     * @param modelConsumer       The lambda that is called with each matching model.
-     * @param <T>                 The specific type of model to get or a sub class of it.
+     * @param modelTypeOrSubClass The specific type of {@link ModelAPI model} (or sub class) to iterate over in the {@link EnvironmentModel environment}.
+     * @param modelConsumer       The lambda that is called with each matching {@link ModelAPI model}.
+     * @param <T>                 The specific type of {@link ModelAPI model} to get or a sub class of it.
      */
     public <T extends ModelAPI> void forEachTypeOfModelOrSubClass(Class<T> modelTypeOrSubClass, Consumer<T> modelConsumer)
     {
@@ -315,14 +315,14 @@ public class EnvironmentController
     }
 
     /**
-     * This iterates through each specific type of model
-     * and only matches models that are EXACTLY that type (not sub classes).
+     * This iterates through each specific type of {@link ModelAPI model}
+     * and only matches {@link ModelAPI models} that are EXACTLY that type (not sub classes).
      *
-     * @param exactModelType The exact type of model to iterate over in the environment.
-     * @param modelConsumer  The lambda that is called with each matching model.
-     * @param <T>            The specific type of model to get or a sub class of it.
+     * @param exactModelType The exact type of {@link ModelAPI model} to iterate over in the {@link EnvironmentModel environment}.
+     * @param modelConsumer  The lambda that is called with each matching {@link ModelAPI model}.
+     * @param <T>            The specific type of {@link ModelAPI model} to get (exactly).
      */
-    public <T extends ModelBase> void forEachTypeOfModelExactly(Class<T> exactModelType, Consumer<T> modelConsumer)
+    public <T extends ModelAPI> void forEachTypeOfModelExactly(Class<T> exactModelType, Consumer<T> modelConsumer)
     {
         // Go through each model of the model
         for (ModelAPI model : getEnvironmentModel().models)
@@ -340,6 +340,75 @@ public class EnvironmentController
 
                 // Pass this model to the callback:
                 modelConsumer.accept(specificModel);
+            }
+        }
+    }
+
+    /**
+     * A convenience method for going through each {@link AgentConfigAPI agent config} in the {@link EnvironmentModel environment}.
+     *
+     * @param agentConfigConsumer The logic that consumes each {@link AgentConfigAPI agent config} in the {@link EnvironmentModel environment}.
+     */
+    public void forEachAgentConfig(Consumer<AgentConfigAPI> agentConfigConsumer)
+    {
+        this.getEnvironmentModel().agentConfigs.forEach(agentConfigConsumer);
+    }
+
+    /**
+     * This iterates through each specific type of {@link AgentConfigAPI agent config} or a sub class of it.
+     *
+     * @param agentConfigTypeOrSubClass The specific type of {@link AgentConfigAPI agent config} (or sub class) to iterate over in the {@link EnvironmentModel environment}.
+     * @param agentConfigConsumer       The lambda that is called with each matching {@link AgentConfigAPI agent config}.
+     * @param <T>                       The specific type of {@link AgentConfigAPI agent config} to get or a sub class of it.
+     */
+    public <T extends AgentConfigAPI> void forEachTypeOfAgentConfigOrSubClass(Class<T> agentConfigTypeOrSubClass, Consumer<T> agentConfigConsumer)
+    {
+        // Go through each agent config in the environment:
+        for (AgentConfigAPI agentConfig : getEnvironmentModel().agentConfigs)
+        {
+            // Get the specific class of the agent config so that we can check whether it is the type we wanted or a sub class:
+            Class<? extends AgentConfigAPI> agentConfigClass = agentConfig.getClass();
+
+            // Check whether it is the right type that was requested or a sub class:
+            if (agentConfigClass == agentConfigTypeOrSubClass || agentConfigTypeOrSubClass.isAssignableFrom(agentConfigClass))
+            {
+                // Now we know that this is the right type or a sub class that was requested.
+
+                // Get the strongly typed agent config that the call back wants:
+                T specificAgentConfig = (T) agentConfig;
+
+                // Pass this agent config to the callback:
+                agentConfigConsumer.accept(specificAgentConfig);
+            }
+        }
+    }
+
+    /**
+     * This iterates through each specific type of {@link AgentConfigAPI agent config}
+     * and only matches {@link AgentConfigAPI agent configs} that are EXACTLY that type (not sub classes).
+     *
+     * @param exactAgentConfigType The exact type of {@link AgentConfigAPI agent config} to iterate over in the {@link EnvironmentModel environment}.
+     * @param agentConfigConsumer  The lambda that is called with each matching {@link AgentConfigAPI agent config}.
+     * @param <T>                  The specific type of {@link AgentConfigAPI agent config} to get (exactly).
+     */
+    public <T extends AgentConfigAPI> void forEachTypeOfAgentConfigExactly(Class<T> exactAgentConfigType, Consumer<T> agentConfigConsumer)
+    {
+        // Go through each agent config in the environment:
+        for (AgentConfigAPI agentConfig : getEnvironmentModel().agentConfigs)
+        {
+            // Get the specific class of the agent config so that we can check whether it is the type we wanted:
+            Class<? extends AgentConfigAPI> agentConfigClass = agentConfig.getClass();
+
+            // Check whether it is EXACTLY the right type that was requested:
+            if (agentConfigClass == exactAgentConfigType)
+            {
+                // Now we know that this is EXACTLY the right type that was requested.
+
+                // Get the strongly typed agent config that the call back wants:
+                T specificAgentConfig = (T) agentConfig;
+
+                // Pass this agent config to the callback:
+                agentConfigConsumer.accept(specificAgentConfig);
             }
         }
     }

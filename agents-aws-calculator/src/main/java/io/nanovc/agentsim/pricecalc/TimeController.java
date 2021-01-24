@@ -6,7 +6,9 @@ import io.nanovc.agentsim.SimulationException;
 import io.nanovc.meh.MEHConcepts;
 import io.nanovc.meh.MEHPatterns;
 
-import java.util.Objects;
+import java.time.Instant;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A controller for time.
@@ -32,15 +34,27 @@ public class TimeController
     public final Timeline timeline;
 
     /**
+     * The {@link EnvironmentController environment controller} that we use to interact with the {@link EnvironmentModel environment} from this {@link TimeController time controller}.
+     */
+    public final EnvironmentController environmentController;
+
+    /**
      * Creates a new time controller for the given {@link Clock clock} and {@link Timeline timeline}.
      *
-     * @param clock    The {@link Clock clock} to control.
-     * @param timeline The {@link Timeline timeline} to control.
+     * @param clock                 The {@link Clock clock} to control.
+     * @param timeline              The {@link Timeline timeline} to control.
+     * @param environmentController The {@link EnvironmentController environment controller} to use to get access to the {@link EnvironmentModel environment}.
      */
-    public TimeController(Clock clock, Timeline timeline)
+    public TimeController(Clock clock, Timeline timeline, EnvironmentController environmentController)
     {
         this.clock = clock;
         this.timeline = timeline;
+        this.environmentController = environmentController;
+
+        // Make sure we have the dependencies:
+        Objects.requireNonNull(this.clock, "The time controller needs a clock");
+        Objects.requireNonNull(this.timeline, "The time controller needs a timeline");
+        Objects.requireNonNull(this.environmentController, "The time controller needs an environment controller so that it can access other models");
     }
 
     /**
@@ -53,10 +67,12 @@ public class TimeController
     {
         this.clock = environmentController.getModelByName(Clock.NAME);
         this.timeline = environmentController.getModelByName(Timeline.NAME);
+        this.environmentController = environmentController;
 
-        // Make sure we have the models:
+        // Make sure we have the dependencies:
         Objects.requireNonNull(this.clock, "The time controller needs a clock called " + Clock.NAME);
-        Objects.requireNonNull(this.clock, "The time controller needs a timeline called " + Timeline.NAME);
+        Objects.requireNonNull(this.timeline, "The time controller needs a timeline called " + Timeline.NAME);
+        Objects.requireNonNull(this.environmentController, "The time controller needs an environment controller so that it can access other models");
     }
 
     /**
@@ -71,6 +87,8 @@ public class TimeController
         SliceIntersectionHandlerWithException overlapHandler
     ) throws SimulationException
     {
+        Objects.requireNonNull(overlapHandler, "An overlap handler must be provided.");
+
         // Get the current period we are simulating:
         TimeSlice now = this.clock.now;
 
@@ -78,7 +96,7 @@ public class TimeController
         TimeSlice past = null, overlap = null, future = null;
 
         // Make sure we have a current simulation period:
-        if (now == null)
+        if (now == null || now.startInclusive == null || now.endExclusive == null)
         {
             // We don't have a current simulation period.
 
@@ -320,59 +338,188 @@ public class TimeController
         }
         // Now we have the overlap if there is one.
 
+        // Squash any time periods where the start and end are the same values:
+        if (past != null && past.startInclusive.equals(past.endExclusive)) past = null;
+        if (overlap != null && overlap.startInclusive.equals(overlap.endExclusive)) overlap = null;
+        if (future != null && future.startInclusive.equals(future.endExclusive)) future = null;
+
         // Check whether we have an overlap:
-        if (overlap != null)
+        if (past != null || overlap != null || future != null)
         {
             // We have an overlap of time for the period of interest and the current simulation period.
-
-            if (overlapHandler != null)
+            try
             {
-                try
-                {
-                    // Handle the overlap:
-                    overlapHandler.handle(past, overlap, future);
-                }
-                catch (Exception e)
-                {
-                    throw new SimulationException("Could not handle overlap in time.", e);
-                }
+                // Handle the overlap:
+                overlapHandler.handle(past, overlap, future);
+            }
+            catch (Exception e)
+            {
+                throw new SimulationException("Could not handle overlap in time.", e);
             }
         }
 
     }
 
     /**
-     * A lambda for a method that takes two arguments and returns no outputs but may throw an exception.
+     * This registers a period of interest (in time) for the given agent.
      *
-     * @param <T> The type of the first argument.
-     * @param <U> The type of the second argument.
+     * @param period    The period of interest that we want to register for the given agent.
+     * @param agentName The name of the agent that we want to register interest for.
      */
-    @FunctionalInterface
-    public interface BiConsumerWithException<T, U>
+    public void registerPeriodOfInterest(TimeSlice period, String agentName)
     {
-        /**
-         * Performs this operation on the given arguments.
-         *
-         * @param t the first input argument
-         * @param u the second input argument
-         */
-        void accept(T t, U u) throws Exception;
+        // Create the model for the period of interest for the given agent:
+        PeriodOfInterestForAgent periodOfInterestForAgent = new PeriodOfInterestForAgent();
+
+        // Give the model a name:
+        periodOfInterestForAgent.name = PeriodOfInterestForAgent.NAME_PREFIX + agentName;
+
+        // Register the period of interest:
+        periodOfInterestForAgent.agentName = agentName;
+        periodOfInterestForAgent.period = period;
+
+        // Add this period of interest to the environment:
+        this.environmentController.addModel(periodOfInterestForAgent);
     }
 
     /**
-     * A lambda for a method that takes two arguments and returns no outputs but may throw an exception.
+     * This updates the {@link Clock clock} for the time simulation based on the {@link PeriodOfInterestForAgent periods of interest} that were registered for agents.
      *
-     * @param <T> The type of the first argument.
+     * @param periodOfInterestForAgentMap The mapping of {@link NamedAgentConfigAPI named agents} to their {@link PeriodOfInterestForAgent periods of interest} to use for updating the {@link Clock clock}.
      */
-    @FunctionalInterface
-    public interface ConsumerWithException<T>
+    public void updateClockBasedOnPeriodsOfInterest(Map<NamedAgentConfigAPI, PeriodOfInterestForAgent> periodOfInterestForAgentMap) throws SimulationException
     {
-        /**
-         * Performs this operation on the given arguments.
-         *
-         * @param t the first input argument
-         */
-        void accept(T t) throws Exception;
+        // Make sure we have some periods of interest:
+        if (periodOfInterestForAgentMap.size() == 0) return;
+        // Now we know that we have some periods of interest.
+
+        // Get references to state:
+        Clock clock = this.clock;
+        Timeline timeline = this.timeline;
+
+        // Build a flattened timeline of all the moments in time that agents are interested in (start or end):
+        NavigableSet<Instant> instantsOfInterest = new TreeSet<>();
+
+        // Go through all the agents that have registered a period of interest for the time simulation and flatten their periods of interest:
+        for (Map.Entry<NamedAgentConfigAPI, PeriodOfInterestForAgent> entry : periodOfInterestForAgentMap.entrySet())
+        {
+            // Get the period of interest for this agent:
+            PeriodOfInterestForAgent periodOfInterestForAgent = entry.getValue();
+
+            // Add the start and end points to our timeline of interesting points:
+            instantsOfInterest.add(periodOfInterestForAgent.period.startInclusive);
+            instantsOfInterest.add(periodOfInterestForAgent.period.endExclusive);
+        }
+        // We have a flattened timeline of all the start and end points of interest. This helps us determine what to set the clock to next.
+
+
+        // Check whether we have started our clock yet:
+        if (clock.now == null)
+        {
+            // We have not started our clock yet.
+
+            // Start the clock:
+            clock.now = new TimeSlice();
+        }
+        else
+        {
+            // We have already started our clock.
+
+            // Add the clock details to our flattened timeline:
+            if (clock.now.startInclusive != null) instantsOfInterest.add(clock.now.startInclusive);
+            if (clock.now.endExclusive != null) instantsOfInterest.add(clock.now.endExclusive);
+        }
+        // Now we know we have started out clock.
+
+        // Set the clock to the earliest period on our flattened timeline:
+        clock.now.startInclusive = instantsOfInterest.pollFirst();
+        clock.now.endExclusive = instantsOfInterest.pollFirst();
+        if (clock.now.endExclusive == null)
+        {
+            // Use the start as the end:
+            clock.now.endExclusive = clock.now.startInclusive;
+        }
+
+        // Create a set of agents to prune for the periods of interest:
+        Set<NamedAgentConfigAPI> agentsToPrune = new HashSet<>();
+
+        // Start pruning old agent configurations until we find the first active one:
+        AtomicBoolean hasActiveAgent = new AtomicBoolean(false);
+        do
+        {
+            // Clear the list of agents to prune for this iteration:
+            agentsToPrune.clear();
+
+            // Go through each of the agents that have periods of interest to see if we can prune any:
+            for (Map.Entry<NamedAgentConfigAPI, PeriodOfInterestForAgent> entry : periodOfInterestForAgentMap.entrySet())
+            {
+                // Get the period of interest for this agent:
+                PeriodOfInterestForAgent periodOfInterestForAgent = entry.getValue();
+
+                // Check how this agents period of interest intersects with the current clock:
+                handlePeriodOfInterest(
+                    periodOfInterestForAgent.period,
+                    (past, overlap, future) ->
+                    {
+                        // Check whether there is an active overlap with the current clock:
+                        if (overlap != null)
+                        {
+                            // There is an active overlap with the current clock.
+                            // Flag that there is an active agent:
+                            hasActiveAgent.set(true);
+                        }
+                        else
+                        {
+                            // There is no active overlap between this agent and the clock.
+
+                            // Check whether the agent is in the past:
+                            if (past != null)
+                            {
+                                // This agent is in the past.
+
+                                // Flag this agent as one that can be pruned:
+                                NamedAgentConfigAPI agentToPrune = entry.getKey();
+                                agentsToPrune.add(agentToPrune);
+
+                                // Prune this period for the agent:
+                                this.environmentController.removeModel(periodOfInterestForAgent);
+                            }
+                        }
+                    }
+                );
+            }
+            // Now we know whether we have any agents to prune.
+
+            // Prune any agents that we found:
+            agentsToPrune.forEach(periodOfInterestForAgentMap::remove);
+
+            // Check whether there is still something to do:
+            if (periodOfInterestForAgentMap.size() == 0) break;
+            // Now we know that there is still something to do.
+
+            // Check whether there are any active agents yet, and if not then move the clock time along:
+            if (!hasActiveAgent.get())
+            {
+                // We don't have any active agents for the current period in the clock.
+
+                // Capture this period on the timeline:
+                TimeSlice previousClockTimeSlice = clock.now;
+                timeline.timeSlices.add(previousClockTimeSlice);
+
+                // Move the clock along:
+                TimeSlice nextClockTimeSlice = new TimeSlice();
+                clock.now = nextClockTimeSlice;
+                nextClockTimeSlice.startInclusive = previousClockTimeSlice.endExclusive;
+                nextClockTimeSlice.endExclusive = instantsOfInterest.pollFirst();
+                if (nextClockTimeSlice.endExclusive == null)
+                {
+                    // Use the start as the end:
+                    nextClockTimeSlice.endExclusive = nextClockTimeSlice.startInclusive;
+                }
+            }
+        }
+        while (!hasActiveAgent.get());
+
     }
 
     /**

@@ -1,6 +1,7 @@
 package io.nanovc.agentsim.pricecalc;
 
-import java.time.Instant;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 
 /**
  * A slice of time for simulation.
@@ -19,4 +20,52 @@ public class TimeSlice
      * Exclusive means that this instant in time is not considered within the simulation period.
      */
     public Instant endExclusive;
+
+    @Override public String toString()
+    {
+        if (this.startInclusive == null)
+        {
+            if (this.endExclusive == null)
+            {
+                return "TimeSlice";
+            }
+            else
+            {
+                return "TimeSlice[..." +
+                       endExclusive +
+                       ')';
+            }
+        }
+        else
+        {
+            if (this.endExclusive == null)
+            {
+                return "TimeSlice[" +
+                       startInclusive +
+                       "...)";
+            }
+            else
+            {
+                if (Duration.between(startInclusive, endExclusive).toDays() < 1)
+                {
+                    ZoneId zoneId = ZoneId.of("Z");
+                    return "TimeSlice[" +
+                           DateTimeFormatter.ISO_LOCAL_TIME.format(LocalTime.ofInstant(startInclusive, zoneId)) +
+                           " - to - " +
+                           DateTimeFormatter.ISO_LOCAL_TIME.format(LocalTime.ofInstant(endExclusive, zoneId)) +
+                           " for " +
+                           DateTimeFormatter.ISO_LOCAL_DATE.format(LocalDate.ofInstant(startInclusive, zoneId)) +
+                           ')';
+                }
+                else
+                {
+                    return "TimeSlice[" +
+                           startInclusive +
+                           " - to - " +
+                           endExclusive +
+                           ')';
+                }
+            }
+        }
+    }
 }
