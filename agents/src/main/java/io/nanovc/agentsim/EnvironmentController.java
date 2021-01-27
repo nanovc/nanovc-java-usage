@@ -142,6 +142,49 @@ public class EnvironmentController
     }
 
     /**
+     * Adds the given model if it doesn't exist or
+     * replaces an existing model with the given name if it already exists.
+     * If it does exist then the given replacement is given the same name and used instead.
+     * This is useful when replacing a model from an input environment
+     * to another model in the output environment, during simulations.
+     *
+     * @param modelToAddOrReplace The model to add or replace.
+     */
+    public void addOrReplaceModel(ModelAPI modelToAddOrReplace)
+    {
+        addOrReplaceModel(modelToAddOrReplace.getName(), modelToAddOrReplace);
+    }
+
+    /**
+     * Adds the given model if it doesn't exist or
+     * replaces an existing model with the given name if it already exists.
+     * If it does exist then the given replacement is given the same name and used instead.
+     * This is useful when replacing a model from an input environment
+     * to another model in the output environment, during simulations.
+     *
+     * @param modelName           The name of the model to add or replace.
+     * @param modelToAddOrReplace The model to add or replace.
+     */
+    public void addOrReplaceModel(String modelName, ModelAPI modelToAddOrReplace)
+    {
+        // Check whether we already have an existing model:
+        ModelAPI existingModel = this.getModelByName(modelName);
+        if (existingModel != null)
+        {
+            // We have an existing model with the given name.
+
+            // Remove the existing model:
+            removeModel(existingModel);
+        }
+
+        // Make sure the new model has the same name:
+        modelToAddOrReplace.setName(modelName);
+
+        // Add the new model:
+        addModel(modelToAddOrReplace);
+    }
+
+    /**
      * Replaces an existing model with the given name only if it already exists.
      * If it does exist then the given replacement is given the same name and used instead.
      * This is useful when replacing a model from an input environment

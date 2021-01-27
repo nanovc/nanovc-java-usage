@@ -71,6 +71,13 @@ public class AWSAgent extends AgentBase<AWSAgent.Config>
                     // Register a period of interest only for the future period that is still outstanding (for the next iteration):
                     timeController.registerPeriodOfInterest(future, config.agentName);
                 }
+                else
+                {
+                    // There is no future component for this agent.
+
+                    // Deregister the period of interest for this agent:
+                    timeController.deRegisterPeriodOfInterest(config.agentName);
+                }
             }
         );
     }

@@ -1,10 +1,7 @@
 package io.nanovc.agentsim.simulations.memory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import io.nanovc.agentsim.EnvironmentController;
-import io.nanovc.agentsim.EnvironmentModel;
-import io.nanovc.agentsim.SimulationException;
-import io.nanovc.agentsim.SimulationHandlerTestsBase;
+import io.nanovc.agentsim.*;
 
 import java.util.Comparator;
 import java.util.List;
@@ -156,6 +153,21 @@ public class MemorySimulationHandlerTestsBase extends SimulationHandlerTestsBase
      */
     public MemorySimulationModel assert_Simulation_OutputJSONSolutions(ConsumerWithException<EnvironmentController> modelCreator, String expectedOutputJSONSolutions) throws Exception
     {
+        return assert_Simulation_OutputJSONSolutions(modelCreator, expectedOutputJSONSolutions, null);
+    }
+
+    /**
+     * Runs the simulation for the test and makes sure that the outputs are as expected.
+     *
+     * @param modelCreator                The logic to create the specific input model for the simulation for this test.
+     * @param expectedOutputJSONSolutions The JSON representation of the output solutions that we expect after the simulation runs. This is the JSON value for the array of solutions that we expect from the simulation.
+     * @param simulationConfig            The simulation configuration to use. Null to use the default.
+     * @return The simulation that was run so that additional assertions can be done.
+     * @throws JsonProcessingException If the JSON could not be created for the environment model.
+     * @throws SimulationException     If we had errors while running the simulation.
+     */
+    public MemorySimulationModel assert_Simulation_OutputJSONSolutions(ConsumerWithException<EnvironmentController> modelCreator, String expectedOutputJSONSolutions, MemorySimulationConfig simulationConfig) throws Exception
+    {
         // Run the simulation:
         MemorySimulationModel simulation = assert_Inputs_Simulation_Outputs(
             modelCreator,
@@ -166,7 +178,7 @@ public class MemorySimulationHandlerTestsBase extends SimulationHandlerTestsBase
             {
 
             },
-            null
+            simulationConfig
         );
 
         // Map the solutions so that we only see the output models:

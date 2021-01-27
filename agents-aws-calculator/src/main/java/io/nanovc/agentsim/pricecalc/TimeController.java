@@ -2,6 +2,7 @@ package io.nanovc.agentsim.pricecalc;
 
 import io.nanovc.agentsim.EnvironmentController;
 import io.nanovc.agentsim.EnvironmentModel;
+import io.nanovc.agentsim.ModelAPI;
 import io.nanovc.agentsim.SimulationException;
 import io.nanovc.meh.MEHConcepts;
 import io.nanovc.meh.MEHPatterns;
@@ -401,7 +402,28 @@ public class TimeController
         periodOfInterestForAgent.period = period;
 
         // Add this period of interest to the environment:
-        this.environmentController.addModel(periodOfInterestForAgent);
+        this.environmentController.addOrReplaceModel(periodOfInterestForAgent);
+    }
+
+    /**
+     * This de-registers interest (in time) for the given agent.
+     *
+     * @param agentName The name of the agent that we want to de-register interest for.
+     */
+    public void deRegisterPeriodOfInterest(String agentName)
+    {
+        // Get the name of the model that we need to search for:
+        String modelNameToRemove = PeriodOfInterestForAgent.NAME_PREFIX + agentName;
+
+        // Check whether we have a model with that name:
+        ModelAPI modelToRemove = this.environmentController.getModelByName(modelNameToRemove);
+        if (modelToRemove != null)
+        {
+            // We found the model to remove.
+
+            // Remove it:
+            this.environmentController.removeModel(modelToRemove);
+        }
     }
 
     /**

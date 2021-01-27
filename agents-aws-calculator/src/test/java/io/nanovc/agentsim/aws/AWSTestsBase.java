@@ -80,4 +80,23 @@ public class AWSTestsBase extends MemorySimulationHandlerTestsBase
             this.memorySimulationConfig
         );
     }
+
+    /**
+     * Runs the simulation for the test and makes sure that the inputs and outputs are as expected.
+     * It uses the default AWS simulation configuration.
+     *
+     * @param modelCreator       The logic to create the specific input model for the simulation for this test.
+     * @param expectedOutputJSON The JSON representation of the output model that we expect after the simulation runs.
+     * @return The simulation that was run so that additional assertions can be done.
+     * @throws JsonProcessingException If the JSON could not be created for the environment model.
+     * @throws SimulationException     If we had errors while running the simulation.
+     */
+    public MemorySimulationModel assert_AWS_Simulation_OutputJSONSolutions(ConsumerWithException<EnvironmentController> modelCreator, String expectedOutputJSON) throws Exception
+    {
+        return assert_Simulation_OutputJSONSolutions(
+            modelCreator,
+            expectedOutputJSON,
+            this.memorySimulationConfig
+        );
+    }
 }
