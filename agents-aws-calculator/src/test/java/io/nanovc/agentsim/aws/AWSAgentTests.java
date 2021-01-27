@@ -17,6 +17,7 @@ class AWSAgentTests extends MemorySimulationHandlerTestsBase
 
             // Create the agent configuration:
             AWSAgent.Config agentConfig = new AWSAgent.Config();
+            agentConfig.agentName = "AWS Agent";
             controller.addAgentConfig(agentConfig);
 
             //#endregion
@@ -29,6 +30,8 @@ class AWSAgentTests extends MemorySimulationHandlerTestsBase
             "  \"agentConfigs\" : [\n" +
             "    {\n" +
             "      \"type\" : \"io.nanovc.agentsim.aws.AWSAgent$Config\",\n" +
+            "      \"period\" : { },\n" +
+            "      \"agentName\" : \"AWS Agent\",\n" +
             "      \"enabled\" : true\n" +
             "    }\n" +
             "  ]\n" +
@@ -39,9 +42,28 @@ class AWSAgentTests extends MemorySimulationHandlerTestsBase
         //language=JSON
         String expectedOutputJSON =
             "{\n" +
+            "  \"models\" : [\n" +
+            "    {\n" +
+            "      \"type\" : \"io.nanovc.agentsim.pricecalc.Timeline\",\n" +
+            "      \"name\" : \"timeline\"\n" +
+            "    },\n" +
+            "    {\n" +
+            "      \"type\" : \"io.nanovc.agentsim.pricecalc.Clock\",\n" +
+            "      \"name\" : \"clock\",\n" +
+            "      \"now\" : { }\n" +
+            "    },\n" +
+            "    {\n" +
+            "      \"type\" : \"io.nanovc.agentsim.pricecalc.PeriodOfInterestForAgent\",\n" +
+            "      \"name\" : \"period-of-interest-for-AWS Agent\",\n" +
+            "      \"period\" : { },\n" +
+            "      \"agentName\" : \"AWS Agent\"\n" +
+            "    }\n" +
+            "  ],\n" +
             "  \"agentConfigs\" : [\n" +
             "    {\n" +
             "      \"type\" : \"io.nanovc.agentsim.aws.AWSAgent$Config\",\n" +
+            "      \"period\" : { },\n" +
+            "      \"agentName\" : \"AWS Agent\",\n" +
             "      \"enabled\" : true\n" +
             "    }\n" +
             "  ]\n" +

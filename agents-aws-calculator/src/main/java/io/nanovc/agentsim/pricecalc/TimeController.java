@@ -65,14 +65,36 @@ public class TimeController
      */
     public TimeController(EnvironmentController environmentController)
     {
-        this.clock = environmentController.getModelByName(Clock.NAME);
-        this.timeline = environmentController.getModelByName(Timeline.NAME);
+        Objects.requireNonNull(environmentController, "The time controller needs an environment controller so that it can access other models");
         this.environmentController = environmentController;
 
-        // Make sure we have the dependencies:
-        Objects.requireNonNull(this.clock, "The time controller needs a clock called " + Clock.NAME);
-        Objects.requireNonNull(this.timeline, "The time controller needs a timeline called " + Timeline.NAME);
-        Objects.requireNonNull(this.environmentController, "The time controller needs an environment controller so that it can access other models");
+        // Get the clock from the environment:
+        Clock clock = environmentController.getModelByName(Clock.NAME);
+        if (clock == null)
+        {
+            // We don't have a clock in the environment.
+            // Create a clock:
+            clock = new Clock();
+            clock.name = Clock.NAME;
+
+            // Add the clock to the environment:
+            environmentController.addModel(clock);
+        }
+        this.clock = clock;
+
+        // Get the timeline from the environment:
+        Timeline timeline = environmentController.getModelByName(Timeline.NAME);
+        if (timeline == null)
+        {
+            // We don't have a timeline in the environment.
+            // Create a timeline:
+            timeline = new Timeline();
+            timeline.name = Timeline.NAME;
+
+            // Add the timeline to the environment:
+            environmentController.addModel(timeline);
+        }
+        this.timeline = timeline;
     }
 
     /**
