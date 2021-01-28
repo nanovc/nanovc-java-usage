@@ -205,7 +205,7 @@ public class MemorySimulationHandlerTestsBase extends SimulationHandlerTestsBase
     /**
      * A wrapper to use when we have multiple solutions that we are converting to JSON.
      */
-    public class SolutionWrapper
+    public static class SolutionWrapper
     {
         /**
          * The name of the solution.
