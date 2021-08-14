@@ -4,7 +4,9 @@ import io.nanovc.agentsim.ModelBase;
 
 /**
  * This is a registered period of interest for a given agent.
- * This
+ * This is used as part of the machinery for calculating the variable resolution time for the simulation.
+ * Various agents might be interested in different periods of time and at different granularities.
+ * This is used to signify which period of time each agent is interested in.
  */
 public class PeriodOfInterestForAgent extends ModelBase
 {

@@ -5,6 +5,7 @@ import io.nanovc.agentsim.ReadOnlyEnvironmentController;
 import io.nanovc.agentsim.SimulationController;
 import io.nanovc.agentsim.SimulationIterationAPI;
 import io.nanovc.agentsim.aws.organizations.MemberAccount;
+import io.nanovc.agentsim.aws.organizations.OrganizationController;
 import io.nanovc.agentsim.pricecalc.Clock;
 import io.nanovc.agentsim.pricecalc.TimeAwareAgentBase;
 import io.nanovc.agentsim.pricecalc.TimeController;
@@ -52,10 +53,17 @@ public class EC2Agent extends TimeAwareAgentBase<EC2Agent.Config>
      */
     @Override protected void handleCurrentPeriod(Config config, TimeSlice currentPeriod, TimeController timeController, ReadOnlyEnvironmentController input, EnvironmentController output, SimulationIterationAPI iteration, SimulationController simulation)
     {
-        // Get a controller for AWS:
-        AWSCloudController awsCloudController = new AWSCloudController(output.getModelByName(AWSCloud.AWS));
+        // Get the AWS Cloud model we are interacting with:
+        AWSCloud awsCloud = output.getModelByName(AWSCloud.AWS);
 
-        MemberAccount account = awsCloudController.getOrCreateAccount("Test", "Yay", "Nay");
+        // Get a controller for AWS:
+        AWSCloudController awsCloudController = new AWSCloudController(awsCloud);
+
+        // Get the controller for organizations:
+        OrganizationController organizationController = awsCloudController.createOrganizationControllerAndIndex();
+
+        // Get the test account:
+        MemberAccount account = organizationController.getOrCreateAccount("Test", "Yay", "Nay");
     }
 
 

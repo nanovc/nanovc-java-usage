@@ -3,6 +3,7 @@ package io.nanovc.agentsim.aws;
 import io.nanovc.agentsim.EnvironmentController;
 import io.nanovc.agentsim.aws.organizations.MemberAccount;
 import io.nanovc.agentsim.aws.organizations.Organization;
+import io.nanovc.agentsim.aws.organizations.OrganizationController;
 import io.nanovc.agentsim.pricecalc.TimeAgent;
 import io.nanovc.agentsim.simulations.memory.MemorySimulationHandlerTestsBase;
 import org.junit.jupiter.api.Test;
@@ -28,13 +29,16 @@ class PricingSimulationTests extends AWSTestsBase
             // Create the aws cloud controller for a new AWSCloud instance:
             AWSCloudController awsCloudController = new AWSCloudController(new AWSCloud());
 
+            // Create the organization controller:
+            OrganizationController organizationController = awsCloudController.createOrganizationControllerAndIndex();
+
             String expectedJSON;
 
             // Create an organization:
-            Organization companyOrganization = awsCloudController.getOrCreateOrganization("Company");
+            Organization companyOrganization = organizationController.getOrCreateOrganization("Company");
 
             // Create a Dev account in the organization:
-            MemberAccount devAccount = awsCloudController.getOrCreateAccount("Company", "Dev");
+            MemberAccount devAccount = organizationController.getOrCreateAccount("Company", "Dev");
 
             // Add the cloud model to the simulation:
             controller.addModel(awsCloudController.awsCloud);
@@ -165,13 +169,16 @@ class PricingSimulationTests extends AWSTestsBase
             // Create the aws cloud controller for a new AWSCloud instance:
             AWSCloudController awsCloudController = new AWSCloudController(new AWSCloud());
 
+            // Create the organization controller:
+            OrganizationController organizationController = awsCloudController.createOrganizationControllerAndIndex();
+
             String expectedJSON;
 
             // Create an organization:
-            Organization companyOrganization = awsCloudController.getOrCreateOrganization("Company");
+            Organization companyOrganization = organizationController.getOrCreateOrganization("Company");
 
             // Create a Dev account in the organization:
-            MemberAccount devAccount = awsCloudController.getOrCreateAccount("Company", "Dev");
+            MemberAccount devAccount = organizationController.getOrCreateAccount("Company", "Dev");
 
             // Add the cloud model to the simulation:
             controller.addModel(awsCloudController.awsCloud);
@@ -290,13 +297,16 @@ class PricingSimulationTests extends AWSTestsBase
             // Create the aws cloud controller for a new AWSCloud instance:
             AWSCloudController awsCloudController = new AWSCloudController(new AWSCloud());
 
+            // Create the organization controller:
+            OrganizationController organizationController = awsCloudController.createOrganizationControllerAndIndex();
+
             String expectedJSON;
 
             // Create an organization:
-            Organization companyOrganization = awsCloudController.getOrCreateOrganization("Company");
+            Organization companyOrganization = organizationController.getOrCreateOrganization("Company");
 
             // Create a Dev account in the organization:
-            MemberAccount devAccount = awsCloudController.getOrCreateAccount("Company", "Dev");
+            MemberAccount devAccount = organizationController.getOrCreateAccount("Company", "Dev");
 
             // Add the cloud model to the simulation:
             controller.addModel(awsCloudController.awsCloud);
