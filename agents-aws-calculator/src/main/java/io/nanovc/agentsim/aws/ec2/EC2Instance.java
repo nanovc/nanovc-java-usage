@@ -1,12 +1,12 @@
-package io.nanovc.agentsim.aws;
+package io.nanovc.agentsim.aws.ec2;
 
-import io.nanovc.agentsim.ModelBase;
+import io.nanovc.agentsim.aws.AWSConcept;
 
 /**
  * An EC2 Instance in the cloud.
  * Secure and resizable compute capacity to support virtually any workload.
  * https://aws.amazon.com/ec2/
  */
-public class EC2Instance extends ModelBase
+public class EC2Instance extends AWSConcept
 {
 }

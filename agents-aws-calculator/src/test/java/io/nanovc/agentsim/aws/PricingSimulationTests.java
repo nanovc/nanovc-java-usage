@@ -1,6 +1,7 @@
 package io.nanovc.agentsim.aws;
 
 import io.nanovc.agentsim.EnvironmentController;
+import io.nanovc.agentsim.aws.ec2.EC2Agent;
 import io.nanovc.agentsim.aws.organizations.MemberAccount;
 import io.nanovc.agentsim.aws.organizations.Organization;
 import io.nanovc.agentsim.aws.organizations.OrganizationController;
@@ -388,7 +389,7 @@ class PricingSimulationTests extends AWSTestsBase
             "          \"enabled\" : true\n" +
             "        },\n" +
             "        {\n" +
-            "          \"type\" : \"io.nanovc.agentsim.aws.EC2Agent$Config\",\n" +
+            "          \"type\" : \"io.nanovc.agentsim.aws.ec2.EC2Agent$Config\",\n" +
             "          \"agentName\" : \"EC2 1\",\n" +
             "          \"activePeriod\" : {\n" +
             "            \"startInclusive\" : \"2021-01-01T00:30:00Z\",\n" +

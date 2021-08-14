@@ -1,9 +1,11 @@
-package io.nanovc.agentsim.aws;
+package io.nanovc.agentsim.aws.ec2;
 
 import io.nanovc.agentsim.EnvironmentController;
 import io.nanovc.agentsim.ReadOnlyEnvironmentController;
 import io.nanovc.agentsim.SimulationController;
 import io.nanovc.agentsim.SimulationIterationAPI;
+import io.nanovc.agentsim.aws.AWSCloud;
+import io.nanovc.agentsim.aws.AWSCloudController;
 import io.nanovc.agentsim.aws.organizations.MemberAccount;
 import io.nanovc.agentsim.aws.organizations.OrganizationController;
 import io.nanovc.agentsim.pricecalc.Clock;

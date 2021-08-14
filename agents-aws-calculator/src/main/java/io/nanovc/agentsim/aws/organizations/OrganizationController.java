@@ -40,7 +40,7 @@ public class OrganizationController
      * The controller needs to have {@link OrganizationController#updateIndex()} called on it after this.
      *
      * @param awsCloud The {@link AWSCloud} model to manage.
-     * @return A new organization controller that can be used to manage the {@link Organization organizations} in the given {@link AWSCloud} model.
+     * @return A new {@link OrganizationController organization controller} that can be used to manage the {@link Organization organizations} in the given {@link AWSCloud} model.
      *     The controller needs to have {@link OrganizationController#updateIndex()} called on it after this.
      */
     public static OrganizationController create(AWSCloud awsCloud)
@@ -53,7 +53,7 @@ public class OrganizationController
      * The controller immediately calls {@link OrganizationController#updateIndex()} to index the {@link Organization organizations}.
      *
      * @param awsCloud The {@link AWSCloud} model to manage.
-     * @return A new organization controller that can be used to manage the {@link Organization organizations} in the given {@link AWSCloud} model.
+     * @return A new {@link OrganizationController organization controller} that can be used to manage the {@link Organization organizations} in the given {@link AWSCloud} model.
      *     The automatically calls {@link OrganizationController#updateIndex()} before returning the new controller.
      */
     public static OrganizationController createAndIndex(AWSCloud awsCloud)
