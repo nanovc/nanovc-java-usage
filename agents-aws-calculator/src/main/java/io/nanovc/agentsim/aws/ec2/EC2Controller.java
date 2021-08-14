@@ -73,7 +73,7 @@ public class EC2Controller
         // Index the EC2 instances:
         for (EC2Instance ec2Instance : this.awsCloud.ec2Instances)
         {
-            this.ec2InstancesByName.put(ec2Instance.name, ec2Instance);
+            this.ec2InstancesByName.put(ec2Instance.getName(), ec2Instance);
         }
     }
 
@@ -92,7 +92,7 @@ public class EC2Controller
             EC2Instance ec2Instance = new EC2Instance();
 
             // Set the name for the EC2 instance:
-            ec2Instance.name = ec2InstanceName;
+            ec2Instance.setName(ec2InstanceName);
 
             // Add the EC2 instance to the model:
             this.awsCloud.ec2Instances.add(ec2Instance);

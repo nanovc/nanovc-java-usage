@@ -1,12 +1,13 @@
 package io.nanovc.agentsim.aws;
 
+import io.nanovc.agentsim.ModelBase;
 import io.nanovc.agentsim.aws.ec2.EC2InstanceCollection;
 import io.nanovc.agentsim.aws.organizations.OrganizationCollection;
 
 /**
  * The AWS Cloud Infrastructure.
  */
-public class AWSCloud extends AWSConcept
+public class AWSCloud extends ModelBase
 {
 
     /**

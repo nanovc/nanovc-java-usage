@@ -46,7 +46,7 @@ class OrganizationTests extends AWSTestsBase
     {
         // Create the organization:
         Organization organization = new Organization();
-        organization.name = "Company";
+        organization.setName("Company");
 
         // Create one account at the root:
         MemberAccount resourceAccount = new MemberAccount();
@@ -75,7 +75,7 @@ class OrganizationTests extends AWSTestsBase
     {
         // Create the organization:
         Organization organization = new Organization();
-        organization.name = "Company";
+        organization.setName("Company");
 
         // Create the OU for the first client:
         OrganizationalUnit clientOU1 = new OrganizationalUnit();

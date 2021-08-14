@@ -42,7 +42,13 @@ public class AWSTestsBase extends MemorySimulationHandlerTestsBase
 
         // Use mixins to provide annotations for types that we don't control directly:
         // https://github.com/FasterXML/jackson-docs/wiki/JacksonMixInAnnotations
+        jsonMapper.addMixIn(AWSConceptBase.class, AWSConceptMixin.class);
         jsonMapper.addMixIn(OrganizationalUnit.class, OrganizationalUnitMixin.class);
+    }
+
+    @JsonPropertyOrder({"name"})
+    public static abstract class AWSConceptMixin extends TypedMixin
+    {
     }
 
     @JsonPropertyOrder({"organizationalUnitName"})

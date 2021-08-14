@@ -74,7 +74,7 @@ public class OrganizationController
         // Index the organizations:
         for (Organization organization : this.awsCloud.organizations)
         {
-            this.organizationsByName.put(organization.name, organization);
+            this.organizationsByName.put(organization.getName(), organization);
         }
     }
 
@@ -93,7 +93,7 @@ public class OrganizationController
             Organization organization = new Organization();
 
             // Set the name for the organization:
-            organization.name = organizationName;
+            organization.setName(organizationName);
 
             // Add the organization to the model:
             this.awsCloud.organizations.add(organization);

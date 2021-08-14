@@ -26,7 +26,7 @@ class AWSCloudTests extends AWSTestsBase
 
         Organization organization = new Organization();
         awsCloud.organizations.add(organization);
-        organization.name = "Company";
+        organization.setName("Company");
 
         MemberAccount prodAccount = new MemberAccount();
         organization.root.accounts.add(prodAccount);
