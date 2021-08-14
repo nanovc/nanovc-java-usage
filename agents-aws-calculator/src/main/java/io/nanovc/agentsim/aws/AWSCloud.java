@@ -3,6 +3,7 @@ package io.nanovc.agentsim.aws;
 import io.nanovc.agentsim.ModelBase;
 import io.nanovc.agentsim.aws.ec2.EC2InstanceCollection;
 import io.nanovc.agentsim.aws.organizations.OrganizationCollection;
+import io.nanovc.agentsim.aws.regions.RegionCollection;
 
 /**
  * The AWS Cloud Infrastructure.
@@ -19,6 +20,11 @@ public class AWSCloud extends ModelBase
      * The {@link io.nanovc.agentsim.aws.organizations.Organization organizations} running in this {@link AWSCloud AWS Cloud model}.
      */
     public OrganizationCollection organizations = new OrganizationCollection();
+
+    /**
+     * The {@link io.nanovc.agentsim.aws.regions.Region regions} in the {@link AWSCloud AWS Cloud model}.
+     */
+    public RegionCollection regions = new RegionCollection();
 
     /**
      * The {@link io.nanovc.agentsim.aws.ec2.EC2Instance EC2 instances} running in this {@link AWSCloud AWS Cloud model}.
