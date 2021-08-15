@@ -1,5 +1,7 @@
 package io.nanovc.agentsim.aws.organizations;
 
+import io.nanovc.agentsim.aws.accounts.Account;
+
 /**
  * A standard AWS account that contains your AWS resources.
  * You can attach a policy to an account to apply controls to only that one account.

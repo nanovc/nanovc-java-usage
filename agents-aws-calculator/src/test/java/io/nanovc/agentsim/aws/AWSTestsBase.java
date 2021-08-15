@@ -1,5 +1,6 @@
 package io.nanovc.agentsim.aws;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -39,6 +40,7 @@ public class AWSTestsBase extends MemorySimulationHandlerTestsBase
         // Register the Java Date and Time serialization module:
         jsonMapper.registerModule(new JavaTimeModule());
         jsonMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        jsonMapper.setSerializationInclusion(JsonInclude.Include.NON_DEFAULT);
 
         // Use mixins to provide annotations for types that we don't control directly:
         // https://github.com/FasterXML/jackson-docs/wiki/JacksonMixInAnnotations

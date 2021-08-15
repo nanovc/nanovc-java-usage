@@ -1,6 +1,5 @@
 package io.nanovc.agentsim.aws.regions;
 
-import io.nanovc.agentsim.aws.AWSConceptBase;
 import io.nanovc.agentsim.aws.NamedAWSConceptBase;
 
 /**
@@ -16,6 +15,9 @@ import io.nanovc.agentsim.aws.NamedAWSConceptBase;
  * companies are better isolated and protected from issues such as power outages, lightning strikes, tornadoes, earthquakes, and more.
  * {@link AvailabilityZone AZs} are physically separated by a meaningful distance, many kilometers, from any other {@link AvailabilityZone AZ},
  * although all are within 100 km (60 miles) of each other.
+ * <p>
+ * https://aws.amazon.com/about-aws/global-infrastructure/regions_az/
+ * https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
  */
 public class AvailabilityZone extends NamedAWSConceptBase
 {

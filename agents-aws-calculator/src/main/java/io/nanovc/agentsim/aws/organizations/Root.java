@@ -1,5 +1,7 @@
 package io.nanovc.agentsim.aws.organizations;
 
+import io.nanovc.agentsim.aws.accounts.Account;
+
 /**
  * A root node in an {@link Organization organization} tree.
  * The parent container for all the {@link Account accounts} for your {@link Organization organization}.

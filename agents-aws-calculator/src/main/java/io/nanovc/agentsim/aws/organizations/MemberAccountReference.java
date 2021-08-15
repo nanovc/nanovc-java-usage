@@ -1,5 +1,7 @@
 package io.nanovc.agentsim.aws.organizations;
 
+import io.nanovc.agentsim.aws.accounts.AccountReference;
+
 /**
  * A reference to a specific {@link MemberAccount member account} in an {@link Organization organization}.
  */

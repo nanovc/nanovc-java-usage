@@ -53,16 +53,21 @@ public class AgentSimTestsBase
      * https://github.com/FasterXML/jackson-docs/wiki/JacksonMixInAnnotations
      */
     @JsonTypeInfo(use= JsonTypeInfo.Id.CLASS, include= JsonTypeInfo.As.PROPERTY, property="type")
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
     public static abstract class TypedMixin
     {
     }
 
     public static abstract class AgentConfigMixin extends TypedMixin
     {
+        @JsonInclude(JsonInclude.Include.ALWAYS)
+        public abstract boolean isEnabled();
     }
 
     public static abstract class ModelMixin extends TypedMixin
     {
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
+        public abstract String getName();
     }
 
 }

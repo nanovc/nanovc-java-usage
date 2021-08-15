@@ -3,6 +3,7 @@ package io.nanovc.agentsim.aws.organizations;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.nanovc.agentsim.aws.AWSCloud;
 import io.nanovc.agentsim.aws.AWSTestsBase;
+import io.nanovc.agentsim.aws.accounts.AccountController;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,6 +54,7 @@ class OrganizationControllerTests extends AWSTestsBase
             "      \"type\" : \"io.nanovc.agentsim.aws.organizations.Organization\",\n" +
             "      \"name\" : \"Company\",\n" +
             "      \"root\" : {\n" +
+            "        \"type\" : \"io.nanovc.agentsim.aws.organizations.Root\",\n" +
             "        \"children\" : [\n" +
             "          {\n" +
             "            \"type\" : \"io.nanovc.agentsim.aws.organizations.OrganizationalUnit\",\n" +
@@ -63,6 +65,7 @@ class OrganizationControllerTests extends AWSTestsBase
             "                \"organizationalUnitName\" : \"B\",\n" +
             "                \"accounts\" : [\n" +
             "                  {\n" +
+            "                    \"type\" : \"io.nanovc.agentsim.aws.organizations.MemberAccount\",\n" +
             "                    \"accountName\" : \"Prod\"\n" +
             "                  }\n" +
             "                ]\n" +
@@ -70,7 +73,9 @@ class OrganizationControllerTests extends AWSTestsBase
             "            ]\n" +
             "          }\n" +
             "        ],\n" +
-            "        \"managementAccount\" : { }\n" +
+            "        \"managementAccount\" : {\n" +
+            "          \"type\" : \"io.nanovc.agentsim.aws.organizations.ManagementAccount\"\n" +
+            "        }\n" +
             "      }\n" +
             "    }\n" +
             "  ]\n" +
@@ -110,16 +115,36 @@ class OrganizationControllerTests extends AWSTestsBase
             "      \"type\" : \"io.nanovc.agentsim.aws.organizations.Organization\",\n" +
             "      \"name\" : \"Company\",\n" +
             "      \"root\" : {\n" +
+            "        \"type\" : \"io.nanovc.agentsim.aws.organizations.Root\",\n" +
             "        \"accounts\" : [\n" +
             "          {\n" +
+            "            \"type\" : \"io.nanovc.agentsim.aws.organizations.MemberAccount\",\n" +
             "            \"accountName\" : \"Prod\"\n" +
             "          }\n" +
             "        ],\n" +
-            "        \"managementAccount\" : { }\n" +
+            "        \"managementAccount\" : {\n" +
+            "          \"type\" : \"io.nanovc.agentsim.aws.organizations.ManagementAccount\"\n" +
+            "        }\n" +
             "      }\n" +
             "    }\n" +
             "  ]\n" +
             "}";
         assertEquals(expectedJSON, getJSON(organizationController.awsCloud));
+    }
+
+    /**
+     * This captures the process of upgrading a {@link io.nanovc.agentsim.aws.accounts.NormalAccount normal account}
+     * which does not have an {@link Organization} to an account that does have an {@link Organization}.
+     */
+    @Test
+    public void upgradeNormalAccountToOrganizationAccount() throws JsonProcessingException
+    {
+        // Start a new model of the cloud:
+        AWSCloud awsCloud = new AWSCloud();
+
+        // Create an account controller so we can create a normal account:
+        AccountController accountController = AccountController.createAndIndex(awsCloud);
+
+        // TODO
     }
 }

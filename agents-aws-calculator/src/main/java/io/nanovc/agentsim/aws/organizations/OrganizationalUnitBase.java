@@ -1,5 +1,7 @@
 package io.nanovc.agentsim.aws.organizations;
 
+import io.nanovc.agentsim.aws.AWSConceptBase;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +21,7 @@ import java.util.List;
  * <p>
  * https://docs.aws.amazon.com/organizations/latest/userguide/orgs_getting-started_concepts.html#organizationalunit
  */
-public class OrganizationalUnitBase
+public class OrganizationalUnitBase extends AWSConceptBase
 {
     /**
      * The {@link MemberAccount accounts} in this {@link OrganizationalUnitBase organizational unit}.

@@ -41,12 +41,16 @@ class AWSCloudTests extends AWSTestsBase
             "      \"type\" : \"io.nanovc.agentsim.aws.organizations.Organization\",\n" +
             "      \"name\" : \"Company\",\n" +
             "      \"root\" : {\n" +
+            "        \"type\" : \"io.nanovc.agentsim.aws.organizations.Root\",\n" +
             "        \"accounts\" : [\n" +
             "          {\n" +
+            "            \"type\" : \"io.nanovc.agentsim.aws.organizations.MemberAccount\",\n" +
             "            \"accountName\" : \"Prod\"\n" +
             "          }\n" +
             "        ],\n" +
-            "        \"managementAccount\" : { }\n" +
+            "        \"managementAccount\" : {\n" +
+            "          \"type\" : \"io.nanovc.agentsim.aws.organizations.ManagementAccount\"\n" +
+            "        }\n" +
             "      }\n" +
             "    }\n" +
             "  ]\n" +

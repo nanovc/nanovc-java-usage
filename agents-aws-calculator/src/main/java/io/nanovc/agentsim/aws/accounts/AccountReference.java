@@ -1,4 +1,6 @@
-package io.nanovc.agentsim.aws.organizations;
+package io.nanovc.agentsim.aws.accounts;
+
+import io.nanovc.agentsim.aws.organizations.Organization;
 
 /**
  * A reference to an {@link Account account} in an {@link Organization organization}.

@@ -1,5 +1,7 @@
 package io.nanovc.agentsim.aws.organizations;
 
+import io.nanovc.agentsim.aws.accounts.Account;
+
 /**
  * An {@link Organization organization} has one {@link ManagementAccount management account} along with zero or more {@link MemberAccount member accounts}.
  * <p>

@@ -21,6 +21,8 @@ import io.nanovc.agentsim.aws.NamedAWSConceptBase;
  * <p>
  * <br>
  * https://aws.amazon.com/about-aws/global-infrastructure/regions_az/
+ * https://awscli.amazonaws.com/v2/documentation/api/latest/reference/ec2/describe-regions.html
+ * https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html
  */
 public class Region extends NamedAWSConceptBase
 {

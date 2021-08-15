@@ -1,6 +1,7 @@
 package io.nanovc.agentsim.aws.organizations;
 
 import io.nanovc.agentsim.aws.AWSCloud;
+import io.nanovc.agentsim.aws.accounts.NormalAccount;
 import io.nanovc.meh.MEHConcepts;
 
 import java.util.Arrays;

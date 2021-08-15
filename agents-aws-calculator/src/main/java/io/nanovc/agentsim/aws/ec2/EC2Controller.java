@@ -1,6 +1,9 @@
 package io.nanovc.agentsim.aws.ec2;
 
 import io.nanovc.agentsim.aws.AWSCloud;
+import io.nanovc.agentsim.aws.organizations.OrganizationController;
+import io.nanovc.agentsim.aws.regions.Region;
+import io.nanovc.agentsim.aws.regions.RegionController;
 import io.nanovc.meh.MEHConcepts;
 
 import java.util.LinkedHashMap;
@@ -100,5 +103,60 @@ public class EC2Controller
             // Index this EC2 instance:
             return ec2Instance;
         });
+    }
+
+    /**
+     * Launches the {@link EC2Instance EC2 instance} with the given {@link EC2InstanceLaunchConfig launch configuration}.
+     *
+     * @param rootEC2InstanceName The root name of the {@link EC2Instance EC2 instances} to launch. This is the name used in this {@link AWSCloud} model. If multiple EC2 instances are created then they each get derivative names from this root name.
+     * @param launchConfig        The {@link EC2InstanceLaunchConfig EC2 instance launch configuration} that we want to launch.
+     * @return The {@link EC2InstanceLaunchResult launch results} from the attempt at launching the {@link EC2Instance EC2 instances}.
+     */
+    public EC2InstanceLaunchResult launchEC2Instances(String rootEC2InstanceName, EC2InstanceLaunchConfig launchConfig)
+    {
+        return launchEC2Instances(
+            rootEC2InstanceName,
+            launchConfig,
+            RegionController.createAndIndex(this.awsCloud),
+            OrganizationController.createAndIndex(this.awsCloud)
+        );
+    }
+
+    /**
+     * Launches the {@link EC2Instance EC2 instance} with the given {@link EC2InstanceLaunchConfig launch configuration}.
+     *
+     * @param rootEC2InstanceName The root name of the {@link EC2Instance EC2 instances} to launch. This is the name used in this {@link AWSCloud} model. If multiple EC2 instances are created then they each get derivative names from this root name.
+     * @param launchConfig        The {@link EC2InstanceLaunchConfig EC2 instance launch configuration} that we want to launch.
+     * @param regionController       The controller for managing regions.
+     * @param organizationController The controller for managing organizations.
+     * @return The {@link EC2InstanceLaunchResult launch results} from the attempt at launching the {@link EC2Instance EC2 instances}.
+     */
+    public EC2InstanceLaunchResult launchEC2Instances(
+        String rootEC2InstanceName,
+        EC2InstanceLaunchConfig launchConfig,
+        RegionController regionController,
+        OrganizationController organizationController
+    )
+    {
+        // Create the result that keeps track of this attempt to launch the instances:
+        EC2InstanceLaunchResult launchResult = new EC2InstanceLaunchResult();
+
+        // Get the region that we want to create the instances in:
+        Region region = regionController.getOrCreateRegion(launchConfig.regionName);
+
+        // Create instances according to the config:
+        for (int instanceIndex = 0; instanceIndex < launchConfig.numberOfInstances; instanceIndex++)
+        {
+            // Define the instance name:
+            String instanceName = rootEC2InstanceName + (instanceIndex == 0 ? "" : "-" + Integer.toString(instanceIndex));
+
+            // Create the instance in the model:
+            EC2Instance ec2Instance = getOrCreateEC2Instance(instanceName);
+
+            // Add the instance to the list of launched instances:
+            launchResult.launchedEC2Instances.add(ec2Instance);
+        }
+
+        return launchResult;
     }
 }

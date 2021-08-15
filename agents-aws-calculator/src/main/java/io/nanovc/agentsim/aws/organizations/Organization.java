@@ -1,8 +1,7 @@
 package io.nanovc.agentsim.aws.organizations;
 
-import io.nanovc.agentsim.aws.AWSCloud;
-import io.nanovc.agentsim.aws.AWSConceptBase;
 import io.nanovc.agentsim.aws.NamedAWSConceptBase;
+import io.nanovc.agentsim.aws.accounts.Account;
 
 /**
  * An AWS Organization.
@@ -21,6 +20,11 @@ import io.nanovc.agentsim.aws.NamedAWSConceptBase;
  */
 public class Organization extends NamedAWSConceptBase
 {
+    /**
+     * The ID of this {@link Organization}.
+     */
+    public String organizationID;
+
     /**
      * The root of the organizational hierarchy.
      */

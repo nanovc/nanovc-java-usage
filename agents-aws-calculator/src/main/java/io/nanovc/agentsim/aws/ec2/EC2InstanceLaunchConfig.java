@@ -1,5 +1,7 @@
 package io.nanovc.agentsim.aws.ec2;
 
+import io.nanovc.agentsim.aws.accounts.Account;
+
 /**
  * The configuration for launching an {@link EC2Instance EC2 instance}.
  *
@@ -8,6 +10,16 @@ package io.nanovc.agentsim.aws.ec2;
  */
 public class EC2InstanceLaunchConfig
 {
+    /**
+     * The name of the {@link io.nanovc.agentsim.aws.regions.Region region} to launch the {@link EC2Instance EC2 instance} in.
+     */
+    public String regionName;
+
+    /**
+     * The ID of the {@link Account account} to create the {@link EC2Instance EC2 instance} in.
+     */
+    public String accountID;
+
     /**
      * The name of the AMI image to launch.
      */

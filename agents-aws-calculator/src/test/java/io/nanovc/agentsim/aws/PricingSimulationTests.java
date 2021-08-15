@@ -71,12 +71,16 @@ class PricingSimulationTests extends AWSTestsBase
             "          \"type\" : \"io.nanovc.agentsim.aws.organizations.Organization\",\n" +
             "          \"name\" : \"Company\",\n" +
             "          \"root\" : {\n" +
+            "            \"type\" : \"io.nanovc.agentsim.aws.organizations.Root\",\n" +
             "            \"accounts\" : [\n" +
             "              {\n" +
+            "                \"type\" : \"io.nanovc.agentsim.aws.organizations.MemberAccount\",\n" +
             "                \"accountName\" : \"Dev\"\n" +
             "              }\n" +
             "            ],\n" +
-            "            \"managementAccount\" : { }\n" +
+            "            \"managementAccount\" : {\n" +
+            "              \"type\" : \"io.nanovc.agentsim.aws.organizations.ManagementAccount\"\n" +
+            "            }\n" +
             "          }\n" +
             "        }\n" +
             "      ]\n" +
@@ -113,12 +117,16 @@ class PricingSimulationTests extends AWSTestsBase
             "          \"type\" : \"io.nanovc.agentsim.aws.organizations.Organization\",\n" +
             "          \"name\" : \"Company\",\n" +
             "          \"root\" : {\n" +
+            "            \"type\" : \"io.nanovc.agentsim.aws.organizations.Root\",\n" +
             "            \"accounts\" : [\n" +
             "              {\n" +
+            "                \"type\" : \"io.nanovc.agentsim.aws.organizations.MemberAccount\",\n" +
             "                \"accountName\" : \"Dev\"\n" +
             "              }\n" +
             "            ],\n" +
-            "            \"managementAccount\" : { }\n" +
+            "            \"managementAccount\" : {\n" +
+            "              \"type\" : \"io.nanovc.agentsim.aws.organizations.ManagementAccount\"\n" +
+            "            }\n" +
             "          }\n" +
             "        }\n" +
             "      ]\n" +
@@ -234,12 +242,16 @@ class PricingSimulationTests extends AWSTestsBase
             "              \"type\" : \"io.nanovc.agentsim.aws.organizations.Organization\",\n" +
             "              \"name\" : \"Company\",\n" +
             "              \"root\" : {\n" +
+            "                \"type\" : \"io.nanovc.agentsim.aws.organizations.Root\",\n" +
             "                \"accounts\" : [\n" +
             "                  {\n" +
+            "                    \"type\" : \"io.nanovc.agentsim.aws.organizations.MemberAccount\",\n" +
             "                    \"accountName\" : \"Dev\"\n" +
             "                  }\n" +
             "                ],\n" +
-            "                \"managementAccount\" : { }\n" +
+            "                \"managementAccount\" : {\n" +
+            "                  \"type\" : \"io.nanovc.agentsim.aws.organizations.ManagementAccount\"\n" +
+            "                }\n" +
             "              }\n" +
             "            }\n" +
             "          ]\n" +
@@ -346,30 +358,38 @@ class PricingSimulationTests extends AWSTestsBase
             "              \"type\" : \"io.nanovc.agentsim.aws.organizations.Organization\",\n" +
             "              \"name\" : \"Company\",\n" +
             "              \"root\" : {\n" +
+            "                \"type\" : \"io.nanovc.agentsim.aws.organizations.Root\",\n" +
             "                \"accounts\" : [\n" +
             "                  {\n" +
+            "                    \"type\" : \"io.nanovc.agentsim.aws.organizations.MemberAccount\",\n" +
             "                    \"accountName\" : \"Dev\"\n" +
             "                  }\n" +
             "                ],\n" +
-            "                \"managementAccount\" : { }\n" +
+            "                \"managementAccount\" : {\n" +
+            "                  \"type\" : \"io.nanovc.agentsim.aws.organizations.ManagementAccount\"\n" +
+            "                }\n" +
             "              }\n" +
             "            },\n" +
             "            {\n" +
             "              \"type\" : \"io.nanovc.agentsim.aws.organizations.Organization\",\n" +
             "              \"name\" : \"Test\",\n" +
             "              \"root\" : {\n" +
+            "                \"type\" : \"io.nanovc.agentsim.aws.organizations.Root\",\n" +
             "                \"children\" : [\n" +
             "                  {\n" +
             "                    \"type\" : \"io.nanovc.agentsim.aws.organizations.OrganizationalUnit\",\n" +
             "                    \"organizationalUnitName\" : \"Yay\",\n" +
             "                    \"accounts\" : [\n" +
             "                      {\n" +
+            "                        \"type\" : \"io.nanovc.agentsim.aws.organizations.MemberAccount\",\n" +
             "                        \"accountName\" : \"Nay\"\n" +
             "                      }\n" +
             "                    ]\n" +
             "                  }\n" +
             "                ],\n" +
-            "                \"managementAccount\" : { }\n" +
+            "                \"managementAccount\" : {\n" +
+            "                  \"type\" : \"io.nanovc.agentsim.aws.organizations.ManagementAccount\"\n" +
+            "                }\n" +
             "              }\n" +
             "            }\n" +
             "          ]\n" +
